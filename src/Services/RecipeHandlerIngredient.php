@@ -1,5 +1,5 @@
 <?php
-// RecipeHandler.php
+// RecipeHandlerIngredient.php
 
 namespace App\Services;
 
@@ -23,7 +23,13 @@ final class RecipeHandlerIngredient
     {
         try {
             // Extract ingredient from the query parameters
-            $ingredient = $args['ingredient'];
+            $queryParams = $request->getQueryParams();
+            $ingredient = $queryParams['ingredient'] ?? '';
+
+            // Check if ingredient is missing
+            if (empty($ingredient)) {
+                return $response->withStatus(404)->write("Ingredient is missing");
+            }
 
             // Get the SQL query for retrieving recipes by ingredient
             $query = Ingredient::getRecipesByIngredientQuery();
