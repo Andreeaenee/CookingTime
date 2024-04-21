@@ -43,3 +43,15 @@ CREATE TABLE recipes_has_ingredients (
     quantity NUMERIC
 );
 
+ALTER TABLE favorites
+ADD COLUMN user_id INT REFERENCES "user"(id);
+
+CREATE TABLE shopping_list (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES "user"(id),
+    ingredients TEXT,
+    date_created DATE
+);
+
+
+
