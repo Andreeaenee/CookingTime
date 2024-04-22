@@ -8,11 +8,13 @@ return function ($app) {
     // Setup route using the RouteService
     $app->get('/', '\App\Services\RouteService:helloWorld');
 
+    $app->get('/favorites', '\App\Services\FavoritesHandler:getFavorite');
 
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
         // Setup route for searching recipes by category
         $app->get('/byCategory/{categoryId}', '\App\Services\RecipeHandler:getRecipesByCategoryId');
+
 
         // Setup route for getting recipe by ID
         $app->get('/{recipeId}', '\App\Services\RecipeHandlerId:getRecipeById');
@@ -22,7 +24,6 @@ return function ($app) {
     });
   
     $app->get('/users/{userId}', '\App\Services\UserHandler:getUserById');
-
 
     return $app;
 };

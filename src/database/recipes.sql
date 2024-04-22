@@ -11,3 +11,18 @@ VALUES
   ('Pasta'),
   ('Desserts'),
   ('Salads');
+
+-- be sure that those id of recipe are present in dbeaver :)
+  INSERT INTO "favorites" (id, user_id,recipe_id)
+VALUES
+  (1, 1, 2),
+  (2, 5, 234),
+  (3, 800, 31);
+
+ INSERT INTO "user" (id, first_name, last_name, email, password)
+VALUES
+    (1, 'John', 'Doe', 'john@example.com', 'hashed_password_1'),
+    (2, 'Jane', 'Smith', 'jane@example.com', 'hashed_password_2'),
+    (3, 'Alice', 'Johnson', 'alice@example.com', 'hashed_password_3'),
+    (4, 'Bob', 'Brown', 'bob@example.com', 'hashed_password_4'),
+    (5, 'Emily', 'Davis', 'emily@example.com', 'hashed_password_5');

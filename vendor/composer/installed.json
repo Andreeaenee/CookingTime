@@ -829,7 +829,7 @@
                     "url": "https://github.com/symfony/contracts"
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "files": [
                     "function.php"
