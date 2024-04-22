@@ -25,5 +25,6 @@ return function ($app) {
   
     $app->get('/users/{userId}', '\App\Services\UserHandler:getUserById');
 
+    $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandlerId:getShoppingListId');
     return $app;
 };
