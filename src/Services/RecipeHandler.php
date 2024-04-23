@@ -23,6 +23,45 @@ final class RecipeHandler
     }
 
 
+    public function getRecipes($request, $response, $args)
+    {
+        try {
+            // Get the SQL query to retrieve all recipes with their ingredients
+            $query = Recipe::getRecipesQuery();
+
+            // Query database to retrieve all recipes with their ingredients
+            $statement = $this->pdo->prepare($query);
+            $statement->execute();
+            $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Group recipes by ID and combine their ingredients
+            $groupedRecipes = [];
+            foreach ($recipes as $recipe) {
+                $recipeId = $recipe['id'];
+                if (!isset($groupedRecipes[$recipeId])) {
+                    $groupedRecipes[$recipeId] = $recipe;
+                    $groupedRecipes[$recipeId]['ingredients'] = [];
+                }
+                if (!empty($recipe['ingredient_name'])) {
+                    $groupedRecipes[$recipeId]['ingredients'][] = [
+                        'name' => $recipe['ingredient_name'],
+                        'quantity' => $recipe['quantity']
+                    ];
+                }
+                // Unset unnecessary field
+                unset($groupedRecipes[$recipeId]['ingredient_name']);
+                unset($groupedRecipes[$recipeId]['quantity']);
+            }
+
+            // Return the grouped recipes as JSON
+            return $response->withJson(array_values($groupedRecipes));
+        } catch (\PDOException $e) {
+            // Handle database errors
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
+
+
     public function getRecipesByCategoryId($request, $response, $args)
     {
         try {
@@ -36,7 +75,13 @@ final class RecipeHandler
             $statement = $this->pdo->prepare($query);
             $statement->execute(['categoryId' => $categoryId]);
             $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
-    
+
+             // Check if any recipes are found
+            if (empty($recipes)) {
+             // Return a custom message indicating that the category does not exist
+             return $response->withStatus(404)->write("No recipes found for the given category ID.");
+            }
+     
             // Return the recipes as JSON
             return $response->withJson($recipes);
         } catch (\PDOException $e) {

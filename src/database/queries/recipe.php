@@ -9,6 +9,13 @@ final class Recipe
     {
         return "SELECT * FROM recipes WHERE id = :recipeId";
     }
+    public static function getRecipesQuery(): string
+    {
+        return "SELECT recipes.*, ingredients.name AS ingredient_name, recipes_has_ingredients.quantity 
+        FROM recipes 
+        LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.recipe_id 
+        LEFT JOIN ingredients ON recipes_has_ingredients.ingredient_id = ingredients.id";
+    }
 
     public static function addRecipeQuery(): string
     {
