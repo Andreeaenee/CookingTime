@@ -14,12 +14,10 @@ return function ($app) {
     $app->group('/recipes', function () use ($app) {
         // Setup route for searching recipes by category
         $app->get('/byCategory/{categoryId}', '\App\Services\RecipeHandler:getRecipesByCategoryId');
-
-
         // Setup route for getting recipe by ID
-        $app->get('/{recipeId}', '\App\Services\RecipeHandlerId:getRecipeById');
-      
-        $app->get('/recipes/byIngredient/{ingredient}', '\App\Services\RecipeHandlerIngredient:getRecipesByIngredient');
+        $app->get('/{recipeId}', '\App\Services\RecipeHandler:getRecipeById');
+
+        $app->get('/byIngredient/{ingredient}', '\App\Services\RecipeHandler:getRecipesByIngredient');
       
     });
   
