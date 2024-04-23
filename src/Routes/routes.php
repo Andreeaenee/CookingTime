@@ -16,10 +16,8 @@ return function ($app) {
    
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
-       
         $app->get('/byCategory/{categoryId}', '\App\Services\RecipeHandler:getRecipesByCategoryId');
         $app->get('/{recipeId}', '\App\Services\RecipeHandler:getRecipeById');
-
         $app->get('/byIngredient/{ingredient}', '\App\Services\RecipeHandler:getRecipesByIngredient');
       
     });

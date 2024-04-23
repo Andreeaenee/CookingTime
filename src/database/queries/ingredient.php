@@ -9,4 +9,14 @@ final class Ingredient
     {
         return "SELECT * FROM recipes WHERE list_ingredients LIKE '%' || :ingredient || '%'";
     }
+
+    public static function checkIngredientQuery(): string
+    {
+        return "SELECT id FROM ingredients WHERE name = :name";
+    }
+
+    public static function addIngredientQuery(): string
+    {
+        return "INSERT INTO ingredients (name) VALUES (:name)";
+    }
 }
