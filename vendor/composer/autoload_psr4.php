@@ -14,5 +14,6 @@ return array(
     'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),
+    'CorsSlim\\' => array($vendorDir . '/palanik/corsslim'),
     'App\\' => array($baseDir . '/src'),
 );
