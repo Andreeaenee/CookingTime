@@ -38,4 +38,44 @@ final class FavoritesHandler
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+
+    public function addFavorite($request, $response)
+    {
+        try {
+            $data = $request->getParsedBody();
+
+            if (!isset($data['recipe_id']) || !isset($data['user_id'])) {
+                return $response->withStatus(400)->write("Missing required fields");
+            }
+
+            $query1 = Favorites::checkFavoriteQuery();
+            $statement1 = $this->pdo->prepare($query1);
+            $statement1->bindParam(':recipeId', $data['recipe_id']);
+            $statement1->bindParam(':userId', $data['user_id']);
+            $statement1->execute();
+            $existingFavorite = $statement1->fetch(\PDO::FETCH_ASSOC);
+
+            if ($existingFavorite) {
+                // Recipe is already a favorite, return a 409 Conflict response
+                return $response->withStatus(409)->write("Recipe is already a favorite");
+            }
+            
+            $query = Favorites::addFavoriteQuery(); 
+
+            $statement = $this->pdo->prepare($query);
+            $statement->bindParam(':recipeId', $data['recipe_id']);
+            $statement->bindParam(':userId', $data['user_id']);
+            $statement->execute();
+
+
+            return $response->withStatus(201)->write("Favorite recipe added successfully");
+        } catch (\PDOException $e) {
+            // Handle database errors
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
 }
+
+
+
+

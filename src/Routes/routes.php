@@ -8,8 +8,6 @@ return function ($app) {
     // Setup route using the RouteService
     $app->get('/', '\App\Services\RouteService:helloWorld');
 
-    $app->get('/favorites', '\App\Services\FavoritesHandler:getFavorite');
-
 
     $app->group('/recipe', function () use ($app) {
         $app->post('/', '\App\Services\RecipeHandler:addRecipe');
@@ -25,7 +23,8 @@ return function ($app) {
         $app->get('/byIngredient/{ingredient}', '\App\Services\RecipeHandler:getRecipesByIngredient');
       
     });
-  
+
+    // Users routes
     $app->group('/user', function () use ($app) {
         $app->post('/', '\App\Services\UserHandler:addUser');
         $app->put('/{userId}', '\App\Services\UserHandler:updateUser');
@@ -36,7 +35,10 @@ return function ($app) {
     });
 
    
-    
+    //Favorites routes
+    $app->post('/favorite', '\App\Services\FavoritesHandler:addFavorite');    
+    $app->get('/favorites', '\App\Services\FavoritesHandler:getFavorite');
+
 
     $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandler:getShoppingListId');
     return $app;

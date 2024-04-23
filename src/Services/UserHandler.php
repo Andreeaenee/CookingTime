@@ -80,6 +80,10 @@ final class UserHandler
         try {
             $data = $request->getParsedBody();
             $userId = $args['userId'];
+
+            if (empty($userId)) {
+                return $response->withStatus(404)->write("User ID is missing");
+            }
             if (isset($data['first_name']) || isset($data['last_name']) || isset($data['email']) || isset($data['password'])) {
 
                 $query = User::updateUserQuery();
@@ -94,6 +98,10 @@ final class UserHandler
               
     
                 $statement->execute();
+                $rowCount = $statement->rowCount();
+                if ($rowCount === 0) {
+                    return $response->withStatus(404)->write("User not found");
+                }
     
                 return $response->withJson(['message' => 'User updated successfully']);
             } else {
@@ -113,10 +121,19 @@ final class UserHandler
     {
         try {
             $userId = $args['userId'];
+            //if user not found
+            if (empty($userId)) {
+                return $response->withStatus(404)->write("User Id not provided");
+            }
 
             $query = User::deleteUserQuery();
             $statement = $this->pdo->prepare($query);
             $statement->execute(['userId' => $userId]);
+
+            $rowCount = $statement->rowCount();
+            if ($rowCount === 0) {
+                return $response->withStatus(404)->write("User not found");
+            }
 
             return $response->withJson(['message' => 'User deleted successfully']);
         } catch (\PDOException $e) {

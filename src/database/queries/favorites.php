@@ -9,5 +9,17 @@ final class Favorites
     {
         return "SELECT * FROM favorites";
     }
+
+    public static function addFavoriteQuery(): string
+    {
+        return "INSERT INTO favorites (user_id, recipe_id)
+        VALUES
+            (:userId, :recipeId)";
+    }
+
+    public static function checkFavoriteQuery(): string
+    {
+        return "SELECT * FROM favorites WHERE user_id = :userId AND recipe_id = :recipeId";
+    }
 }
 
