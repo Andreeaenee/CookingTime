@@ -37,9 +37,11 @@ return function ($app) {
    
     //Favorites routes
     $app->post('/favorite', '\App\Services\FavoritesHandler:addFavorite');    
-    $app->get('/favorites', '\App\Services\FavoritesHandler:getFavorite');
-
-
+    $app->group('/favorites', function () use ($app) {
+        $app->get('/', '\App\Services\FavoritesHandler:getFavorite');
+        $app->delete('/{Id}', '\App\Services\FavoritesHandler:deleteFavorite');
+    });
+    
     $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandler:getShoppingListId');
     return $app;
 };

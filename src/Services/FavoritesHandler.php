@@ -74,6 +74,26 @@ final class FavoritesHandler
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+
+    public function deleteFavorite($request, $response, $args)
+    {
+        try {
+            $id = $args['Id'];
+
+            if (empty($id)) {
+                return $response->withStatus(404)->write("ID is missing");
+            }
+
+            $query = Favorites::deleteFavoriteQuery();
+
+            $statement = $this->pdo->prepare($query);
+            $statement->execute(['Id' => $id]);
+            
+            return $response->write("Favorite recipe deleted successfully");
+        } catch (\PDOException $e) {
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
 }
 
 

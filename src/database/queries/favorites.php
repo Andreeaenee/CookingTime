@@ -21,5 +21,10 @@ final class Favorites
     {
         return "SELECT * FROM favorites WHERE user_id = :userId AND recipe_id = :recipeId";
     }
+
+    public static function deleteFavoriteQuery(): string
+    {
+        return "DELETE FROM favorites WHERE id = :Id";
+    }
 }
 
