@@ -144,5 +144,31 @@ final class RecipeHandler
     }
 }
 
+public function updateRecipe($request, $response, $args)
+{
+    try {
+        $parsedBody = $request->getParsedBody();
+        $recipeId = $args['recipeId'];
+        $currentDate = date('Y-m-d');
 
+        // Prepare the SQL statement to update a recipe
+        $sql = Recipe::updateRecipeQuery();
+        $statement = $this->pdo->prepare($sql);
+
+        $statement->bindParam(':recipeId', $recipeId);
+        $statement->bindParam(':imageId', $parsedBody['imageId']);
+        $statement->bindParam(':description', $parsedBody['description']);
+        $statement->bindParam(':title', $parsedBody['title']);
+        $statement->bindParam(':steps', $parsedBody['steps']);
+        $statement->bindParam(':categoryId', $parsedBody['categoryId']);
+        $statement->bindParam(':date', $currentDate);
+
+        $statement->execute();
+
+        return $response->withJson(['message' => 'Recipe updated successfully']);
+    } catch (\PDOException $e) {
+        // Handle database errors
+        return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+    }
+}
 }

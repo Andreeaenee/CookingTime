@@ -17,4 +17,17 @@ final class Recipe
             (:imageId, :description, :title, :steps, :categoryId, :date)";
     }
 
+    public static function updateRecipeQuery(): string
+    {
+        return "UPDATE recipes
+        SET
+            image_id = :imageId,
+            description = :description,
+            title = :title,
+            steps = :steps,
+            category_id = :categoryId,
+            date = :date
+        WHERE id = :recipeId";
+    }
+
 }

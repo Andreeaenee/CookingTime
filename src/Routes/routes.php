@@ -11,7 +11,11 @@ return function ($app) {
     $app->get('/favorites', '\App\Services\FavoritesHandler:getFavorite');
 
 
-    $app->post('/recipe', '\App\Services\RecipeHandler:addRecipe');
+    $app->group('/recipe', function () use ($app) {
+        $app->post('/', '\App\Services\RecipeHandler:addRecipe');
+        $app->put('/{recipeId}', '\App\Services\RecipeHandler:updateRecipe');
+    });
+   
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
        
@@ -24,6 +28,6 @@ return function ($app) {
   
     $app->get('/users/{userId}', '\App\Services\UserHandler:getUserById');
 
-    $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandlerId:getShoppingListId');
+    $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandler:getShoppingListId');
     return $app;
 };

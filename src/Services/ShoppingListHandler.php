@@ -9,7 +9,7 @@ use App\Database\Queries\shoppinglist;
 
 require_once __DIR__ .  './../config/db.php';
 
-final class ShoppingListHandlerId
+final class ShoppingListHandler
 {
     private $pdo;
 
