@@ -53,5 +53,9 @@ CREATE TABLE shopping_list (
     date_created DATE
 );
 
+ALTER TABLE recipes
+DROP COLUMN list_ingredients;
+
+
 
 
