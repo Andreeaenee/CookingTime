@@ -26,7 +26,17 @@ return function ($app) {
       
     });
   
-    $app->get('/users/{userId}', '\App\Services\UserHandler:getUserById');
+    $app->group('/user', function () use ($app) {
+        $app->post('/', '\App\Services\UserHandler:addUser');
+        $app->put('/{userId}', '\App\Services\UserHandler:updateUser');
+    });
+    $app->group('/users', function () use ($app) {
+        $app->get('/users/{userId}', '\App\Services\UserHandler:getUserById');
+        $app->delete('/{userId}', '\App\Services\UserHandler:deleteUser');
+    });
+
+   
+    
 
     $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandler:getShoppingListId');
     return $app;
