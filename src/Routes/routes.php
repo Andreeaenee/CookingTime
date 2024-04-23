@@ -42,6 +42,10 @@ return function ($app) {
         $app->delete('/{Id}', '\App\Services\FavoritesHandler:deleteFavorite');
     });
     
-    $app->get('/shopping_list/{id}', '\App\Services\ShoppingListHandler:getShoppingListId');
+    $app->group('/shopping_list', function () use ($app) {
+        $app->get('/{id}', '\App\Services\ShoppingListHandler:getShoppingListId');
+        $app->delete('/{id}', '\App\Services\ShoppingListHandler:deleteShoppingList');
+    });
+   
     return $app;
 };

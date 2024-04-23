@@ -49,4 +49,24 @@ final class ShoppingListHandler
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+
+    public function deleteShoppingList($request, $response, $args)
+    {
+        try {
+            $id = $args['id'];
+
+            if (empty($id)) {
+                return $response->withStatus(404)->write("Id is missing");
+            }
+
+            $query = ShoppingList::deleteShoppingListQuery();
+
+            $statement = $this->pdo->prepare($query);
+            $statement->execute(['id' => $id]);
+
+            return $response->withStatus(204);
+        } catch (\PDOException $e) {
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
 }

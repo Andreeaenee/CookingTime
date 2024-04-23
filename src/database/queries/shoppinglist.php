@@ -9,5 +9,9 @@ final class ShoppingList
     {
         return "SELECT * FROM shopping_list WHERE id = :id";
     }
-}
 
+    public static function deleteShoppingListQuery(): string
+    {
+        return "DELETE FROM shopping_list WHERE id = :id";
+    }
+}
