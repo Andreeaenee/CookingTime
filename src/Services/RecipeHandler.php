@@ -120,23 +120,23 @@ final class RecipeHandler
     public function getRecipesByIngredient($request, $response, $args)
     {
         try {
-            // Extract ingredient from the query parameters
-            $queryParams = $request->getQueryParams();
-            $ingredient = $queryParams['ingredient'] ?? '';
-
-            // Check if ingredient is missing
-            if (empty($ingredient)) {
-                return $response->withStatus(404)->write("Ingredient is missing");
-            }
-
+            // Extract ingredient ID from the route parameters
+            $ingredientId = $args['ingredient_id'];
+    
             // Get the SQL query for retrieving recipes by ingredient
-            $query = Ingredient::getRecipesByIngredientQuery();
-
+            $query = Ingredient::getRecipesByIngredientQueryy();
+    
             // Query database to retrieve recipes by ingredient
             $statement = $this->pdo->prepare($query);
-            $statement->execute(['ingredient' => "%$ingredient%"]); // Using LIKE for partial matches
+            $statement->execute(['ingredient' => "%$ingredientId%"]); // Use 'ingredient' instead of 'ingredientId'
             $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
+    
+            // Check if any recipes are found
+            if (empty($recipes)) {
+                // Return custom response if no recipes are found for the ingredient
+                return $response->withStatus(404)->write("No recipes found for the specified ingredient.");
+            }
+    
             // Return the recipes as JSON
             return $response->withJson($recipes);
         } catch (\PDOException $e) {
@@ -144,6 +144,9 @@ final class RecipeHandler
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+    
+    
+
 
     public function addRecipe($request, $response, $args)
 {
