@@ -18,7 +18,6 @@ CREATE TABLE recipes (
     image_id INT,
     description TEXT,
     title VARCHAR(100),
-    list_ingredients TEXT,
     steps TEXT,
     category_id INT REFERENCES category(category_id),
     date DATE
@@ -41,6 +40,7 @@ CREATE TABLE recipes_has_ingredients (
     id_recipe INT REFERENCES recipes(id),
     id_ingredient INT REFERENCES ingredients(id),
     quantity NUMERIC
+    PRIMARY KEY (recipe_id, ingredient_id)
 );
 
 ALTER TABLE favorites

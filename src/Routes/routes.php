@@ -10,11 +10,12 @@ return function ($app) {
 
     $app->get('/favorites', '\App\Services\FavoritesHandler:getFavorite');
 
+
+    $app->post('/recipe', '\App\Services\RecipeHandler:addRecipe');
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
-        // Setup route for searching recipes by category
+       
         $app->get('/byCategory/{categoryId}', '\App\Services\RecipeHandler:getRecipesByCategoryId');
-        // Setup route for getting recipe by ID
         $app->get('/{recipeId}', '\App\Services\RecipeHandler:getRecipeById');
 
         $app->get('/byIngredient/{ingredient}', '\App\Services\RecipeHandler:getRecipesByIngredient');
