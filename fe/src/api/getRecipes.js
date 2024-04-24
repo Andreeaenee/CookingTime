@@ -4,10 +4,9 @@ export async function fetchRecipesData() {
     try {
       const response = await axiosFetch({
         method: 'GET',
-        url: "http://localhost:3001/recipes",
+        url: "http://localhost:8080/recipes/",
       })
-      console.log('Response: ', response)
-      return response
+      return response.responseData
     } catch (error) {
       console.log('Error: ', error)
       throw error

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -7,9 +7,11 @@ import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Wrapper from "../components/Wrapper";
+import { fetchRecipesData } from "../api/getRecipes";
 
 const RecipesPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+    const [data, setData] = useState([]);
 
   const handleFilterClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -19,6 +21,17 @@ const RecipesPage = () => {
     setAnchorEl(null);
   };
 
+  useEffect(() => {
+   fetchRecipesData()
+      .then((response) => {
+        setData(response)
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+      })
+  }, [])
+
+  console.log(data);
   return (
     <Wrapper>
       <div
@@ -66,7 +79,7 @@ const RecipesPage = () => {
             marginTop: 2,
           }}
         >
-          {dummyRecipes.map((recipe) => (
+          {data.map((recipe) => (
             <Card key={recipe.id} sx={{ marginBottom: 2 }}>
               <CardContent>
                 <Typography variant="h5" component="h2">
@@ -90,21 +103,3 @@ const RecipesPage = () => {
 
 export default RecipesPage;
 
-const dummyRecipes = [
-  {
-    id: 1,
-    title: "Spaghetti Carbonara",
-    description: "A classic Italian pasta dish",
-  },
-  {
-    id: 2,
-    title: "Chicken Tikka Masala",
-    description: "A popular Indian curry dish",
-  },
-  {
-    id: 3,
-    title: "Vegetable Stir Fry",
-    description: "A healthy and delicious stir fry",
-  },
-  // Add more recipes as needed
-];
