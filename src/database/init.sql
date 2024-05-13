@@ -39,12 +39,10 @@ CREATE TABLE ingredients (
 CREATE TABLE recipes_has_ingredients (
     id_recipe INT REFERENCES recipes(id),
     id_ingredient INT REFERENCES ingredients(id),
-    quantity NUMERIC
-    PRIMARY KEY (recipe_id, ingredient_id)
+    quantity NUMERIC,
+    PRIMARY KEY (id_recipe, id_ingredient)
 );
 
-ALTER TABLE favorites
-ADD COLUMN user_id INT REFERENCES "user"(id);
 
 CREATE TABLE shopping_list (
     id SERIAL PRIMARY KEY,
@@ -53,8 +51,6 @@ CREATE TABLE shopping_list (
     date_created DATE
 );
 
-ALTER TABLE recipes
-DROP COLUMN list_ingredients;
 
 
 
