@@ -36,5 +36,8 @@ return function ($app) {
         $app->delete('/{id}', '\App\Services\ShoppingListHandler:deleteShoppingList'); 
     });
    
+
+    //login post
+    $app->post('/login', '\App\Services\UserHandler:login');
     return $app;
 };

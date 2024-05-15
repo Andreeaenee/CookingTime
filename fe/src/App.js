@@ -8,11 +8,12 @@ import {
   Outlet,
 } from "react-router-dom";
 import RecipesPage from "./pages/RecipesPage";
-
+import LoginPage from "./pages/LoginPage";
 function App() {
   return (
     <Router>
       <Routes>
+      <Route path="/login" element={<LoginPage />} />
         <Route
           element={
             <div>
@@ -26,7 +27,6 @@ function App() {
           <Route element={<div>My Recipes</div>} />
           <Route element={<div>Favorites</div>} />
           <Route element={<div>Shopping List</div>} />
-          <Route element={<div>Login</div>} />
         </Route>
       </Routes>
     </Router>
