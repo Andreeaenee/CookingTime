@@ -44,40 +44,6 @@ final class UserHandler
         }
     }
 
-    public function addUser($request, $response)
-    {
-        try {
-            // Preluarea datelor din corpul cererii POST
-            $data = $request->getParsedBody();
-
-            // Log pentru a verifica ce date sunt preluate
-            error_log(print_r($data, true));
-
-            // Verificarea dacă toate câmpurile necesare sunt setate
-            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['password'])) {
-                return $response->withStatus(400)->write("Missing required fields");
-            }
-
-            $query = User::addUserQuery();
-
-            // Hasharea parolei înainte de stocare
-            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-
-            // Executarea interogării pentru adăugarea unui utilizator nou
-            $statement = $this->pdo->prepare($query);
-            $statement->execute([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'password' => $hashedPassword
-            ]);
-
-            // Returnarea mesajului de succes
-            return $response->withStatus(201)->withJson(['message' => 'User added successfully']);
-        } catch (\PDOException $e) {
-            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
-        }
-    }
     public function updateUser($request, $response, $args)
     {
         try {
@@ -144,6 +110,32 @@ final class UserHandler
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+    public function addUser($request, $response) {
+        try {
+            $data = $request->getParsedBody();
+
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['email']) || !isset($data['password'])) {
+                return $response->withStatus(400)->write("Missing required fields");
+            }
+
+            $query = User::addUserQuery();
+
+            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+
+            $statement = $this->pdo->prepare($query);
+            $statement->execute([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'password' => $hashedPassword
+            ]);
+
+            return $response->withStatus(201)->withJson(['message' => 'User added successfully']);
+        } catch (\PDOException $e) {
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
+
     public function login($request, $response)
     {
         try {
@@ -156,7 +148,6 @@ final class UserHandler
             $stmt->execute();
             $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            // Verificăm dacă utilizatorul există și parola introdusă corespunde cu hash-ul din baza de date
             if ($user && password_verify($password, $user['password'])) {
                 return $response->withJson(['status' => 'success']);
             } else {

@@ -25,7 +25,7 @@ return function ($app) {
 
     // Users routes
     $app->group('/user', function () use ($app) {
-        $app->post('/', '\App\Services\UserHandler:addUser'); //slim error 
+        $app->post('/', '\App\Services\UserHandler:addUser'); //slim error FIXed IT
         $app->put('/{userId}', '\App\Services\UserHandler:updateUser'); 
     });
     $app->group('/users', function () use ($app) {

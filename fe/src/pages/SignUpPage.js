@@ -13,35 +13,39 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const LoginPage = () => {
+const SignUpPage = () => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8080/login", {
+      const response = await axios.post("http://localhost:8080/user/", {
+        first_name: firstName,
+        last_name: lastName,
         email,
         password,
       });
-      console.log(response.data); // Log server response
-      if (response.data.status === "success") {
-        navigate("/");
+      if (response.data.message === "User added successfully") {
+        setOpenSuccess(true);
+        setTimeout(() => navigate("/login"), 2000); // Redirect după 2 secunde
       } else {
         setErrorMessage(response.data.message);
         setOpenError(true);
       }
     } catch (error) {
-      console.error("Login error:", error); // Log error
-      setErrorMessage(error.response && error.response.data ? error.response.data.message : error.message);
+      setErrorMessage(error.response ? error.response.data.message : error.message);
       setOpenError(true);
     }
   };
 
-  const signUpButtonStyle = {
+  const loginButtonStyle = {
     backgroundColor: "#f0f0f0", // Fundal gri deschis
     color: "#ff4081", // Roz vibrant
     fontWeight: "bold",
@@ -52,7 +56,7 @@ const LoginPage = () => {
     width: "100%", // Se asigură că butonul ocupă întreaga lățime
   };
 
-  const signUpButtonHoverStyle = {
+  const loginButtonHoverStyle = {
     backgroundColor: "#ff4081", // Fundal roz vibrant
     color: "#ffffff", // Text alb
   };
@@ -62,9 +66,27 @@ const LoginPage = () => {
       <Card sx={{ maxWidth: 400 }}>
         <CardContent>
           <Typography variant="h5" component="div">
-            Login
+            Sign Up
           </Typography>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSignUp}>
+            <TextField
+              fullWidth
+              label="First Name"
+              variant="outlined"
+              margin="normal"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+            <TextField
+              fullWidth
+              label="Last Name"
+              variant="outlined"
+              margin="normal"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+            />
             <TextField
               fullWidth
               label="Email"
@@ -85,28 +107,33 @@ const LoginPage = () => {
               required
             />
             <Button type="submit" variant="contained" color="primary" fullWidth>
-              Login
+              Sign Up
             </Button>
           </form>
           <Button
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/login")}
             variant="text"
             color="secondary"
             fullWidth
-            style={signUpButtonStyle}
+            style={loginButtonStyle}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = signUpButtonHoverStyle.backgroundColor;
-              e.target.style.color = signUpButtonHoverStyle.color;
+              e.target.style.backgroundColor = loginButtonHoverStyle.backgroundColor;
+              e.target.style.color = loginButtonHoverStyle.color;
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = signUpButtonStyle.backgroundColor;
-              e.target.style.color = signUpButtonStyle.color;
+              e.target.style.backgroundColor = loginButtonStyle.backgroundColor;
+              e.target.style.color = loginButtonStyle.color;
             }}
           >
-            Don't have an account? Sign Up
+            Already have an account? Login
           </Button>
         </CardContent>
       </Card>
+      <Snackbar open={openSuccess} autoHideDuration={6000} onClose={() => setOpenSuccess(false)}>
+        <Alert onClose={() => setOpenSuccess(false)} severity="success" sx={{ width: '100%' }}>
+          User created successfully!
+        </Alert>
+      </Snackbar>
       <Snackbar open={openError} autoHideDuration={6000} onClose={() => setOpenError(false)}>
         <Alert onClose={() => setOpenError(false)} severity="error" sx={{ width: '100%' }}>
           {errorMessage}
@@ -116,4 +143,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignUpPage;
