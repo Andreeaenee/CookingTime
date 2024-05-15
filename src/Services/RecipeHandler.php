@@ -22,6 +22,25 @@ final class RecipeHandler
         $this->pdo = $pdo;
     }
 
+    public function getFilteredRecipes($request, $response, $args) 
+    {
+        $queryParams = $request->getQueryParams();
+        $filter = $queryParams['filter'] ?? null;
+        $filterId = $queryParams['id'] ?? null;
+        
+        switch ($filter) {
+            case 'category':
+                return $this->getRecipesByCategoryId($request, $response, $filterId);
+                break;
+            case 'ingredient':
+                return $this->getRecipesByIngredient($request, $response, $filterId);
+                break;
+            default:
+                return $this->getRecipes($request, $response, $args);
+                break;
+        }
+    }
+
 
     public function getRecipes($request, $response, $args)
     {
@@ -62,18 +81,15 @@ final class RecipeHandler
     }
 
 
-    public function getRecipesByCategoryId($request, $response, $args)
+    public function getRecipesByCategoryId($request, $response, $filterId)
     {
-        try {
-            // Extract categoryId from the route parameters
-            $categoryId = $args['categoryId'];
-    
+        try {    
             // Get the SQL query for retrieving recipes by category ID
             $query = Category::getRecipesByCategoryIdQuery();
     
             // Query database to retrieve recipes by category ID
             $statement = $this->pdo->prepare($query);
-            $statement->execute(['categoryId' => $categoryId]);
+            $statement->execute(['categoryId' => $filterId]);
             $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
              // Check if any recipes are found
@@ -81,9 +97,27 @@ final class RecipeHandler
              // Return a custom message indicating that the category does not exist
              return $response->withStatus(404)->write("No recipes found for the given category ID.");
             }
+            // Group recipes by ID and combine their ingredients
+            $groupedRecipes = [];
+            foreach ($recipes as $recipe) {
+                $recipeId = $recipe['id'];
+                if (!isset($groupedRecipes[$recipeId])) {
+                    $groupedRecipes[$recipeId] = $recipe;
+                    $groupedRecipes[$recipeId]['ingredients'] = [];
+                }
+                if (!empty($recipe['ingredient_name'])) {
+                    $groupedRecipes[$recipeId]['ingredients'][] = [
+                        'name' => $recipe['ingredient_name'],
+                        'quantity' => $recipe['quantity']
+                    ];
+                }
+                // Unset unnecessary field
+                unset($groupedRecipes[$recipeId]['ingredient_name']);
+                unset($groupedRecipes[$recipeId]['quantity']);
+            }
      
             // Return the recipes as JSON
-            return $response->withJson($recipes);
+            return $response->withJson(array_values($groupedRecipes));
         } catch (\PDOException $e) {
             // Handle database errors
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
@@ -91,140 +125,39 @@ final class RecipeHandler
     }
 
     public function getRecipeById($request, $response, $args)
-    {
-        try {
-            // Extract recipe ID from the route parameters
-            $recipeId = $args['recipeId'];
-
-            // Get the SQL query for retrieving a recipe by its ID
-            $query = Recipe::getRecipeByIdQuery();
-
-            // Query database to retrieve the recipe by its ID
-            $statement = $this->pdo->prepare($query);
-            $statement->execute(['recipeId' => $recipeId]);
-            $recipe = $statement->fetch(\PDO::FETCH_ASSOC);
-
-            // Check if recipe exists
-            if (!$recipe) {
-                return $response->withStatus(404)->write("Recipe not found");
-            }
-
-            // Return the recipe as JSON
-            return $response->withJson($recipe);
-        } catch (\PDOException $e) {
-            // Handle database errors
-            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
-        }
-    }
-
-    public function getRecipesByIngredient($request, $response, $args)
-    {
-        try {
-            // Extract ingredient ID from the route parameters
-            $ingredientId = $args['ingredient_id'];
-    
-            // Get the SQL query for retrieving recipes by ingredient
-            $query = Ingredient::getRecipesByIngredientQueryy();
-    
-            // Query database to retrieve recipes by ingredient
-            $statement = $this->pdo->prepare($query);
-            $statement->execute(['ingredient' => "%$ingredientId%"]); // Use 'ingredient' instead of 'ingredientId'
-            $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
-    
-            // Check if any recipes are found
-            if (empty($recipes)) {
-                // Return custom response if no recipes are found for the ingredient
-                return $response->withStatus(404)->write("No recipes found for the specified ingredient.");
-            }
-    
-            // Return the recipes as JSON
-            return $response->withJson($recipes);
-        } catch (\PDOException $e) {
-            // Handle database errors
-            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
-        }
-    }
-    
-    
-
-
-    public function addRecipe($request, $response, $args)
 {
     try {
-        
-        $parsedBody = $request->getParsedBody();
-        // Checking if all required fields are present
-        $requiredFields = ['imageId', 'description', 'title', 'steps', 'categoryId', 'userId', 'ingredients'];
-        foreach ($requiredFields as $field) {
-            if (!isset($parsedBody[$field])) {
-                throw new \InvalidArgumentException("Missing required field: $field");
-            }
-        }
-        $currentDate = date('Y-m-d');
+        // Extract recipe ID from the route parameters
+        $recipeId = $args['id'];
 
-        $recipeDetails = [
-            'imageId' => $parsedBody['imageId'],
-            'description' => $parsedBody['description'],
-            'title' => $parsedBody['title'],
-            'steps' => $parsedBody['steps'],
-            'categoryId' => $parsedBody['categoryId'],
-            'date' => $currentDate,
-            'userId' => $parsedBody['userId']
-        ];
+        // Get the SQL query for retrieving a recipe by its ID
+        $recipeQuery = Recipe::getRecipeByIdQuery();
+        $ingredientQuery = Ingredient::getIngredientsByRecipeIdQuery();
 
-        // Prepare the SQL statement to add a recipe
-        $sql = Recipe::addRecipeQuery();
-        $statement = $this->pdo->prepare($sql);
+        // Query database to retrieve the recipe by its ID
+        $recipeStatement = $this->pdo->prepare($recipeQuery);
+        $recipeStatement->execute(['recipeId' => $recipeId]);
+        $recipe = $recipeStatement->fetch(\PDO::FETCH_ASSOC);
 
-        $statement->bindParam(':imageId', $recipeDetails['imageId']);
-        $statement->bindParam(':description', $recipeDetails['description']);
-        $statement->bindParam(':title', $recipeDetails['title']);
-        $statement->bindParam(':steps', $recipeDetails['steps']);
-        $statement->bindParam(':categoryId', $recipeDetails['categoryId']);
-        $statement->bindParam(':date', $recipeDetails['date']);
-        $statement->bindParam(':userId', $recipeDetails['userId']);
-
-        $statement->execute();
-
-        // Get the ID of the newly inserted recipe
-        $recipeId = $this->pdo->lastInsertId();
-
-        // Add ingredients to the recipe
-        $ingredients = $parsedBody['ingredients'];
-        foreach ($ingredients as $ingredient) {
-            $ingredientName = $ingredient['name'];
-            $quantity = $ingredient['quantity'];
-
-            // Check if the ingredient already exists in the database
-            $sql = Ingredient :: checkIngredientQuery();
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':name', $ingredientName);
-            $stmt->execute();
-            $existingIngredient = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if ($existingIngredient) {
-                $ingredientId = $existingIngredient['id'];
-            } else {
-                // Insert the new ingredient
-                $sql = Ingredient::addIngredientQuery();
-                $stmt = $this->pdo->prepare($sql);
-                $stmt->bindParam(':name', $ingredientName);
-                $stmt->execute();
-                $ingredientId = $this->pdo->lastInsertId();
-            }
-
-            // Link the ingredient to the recipe
-            $sql = Recipe::addRecipeIngredientQuery();
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':recipeId', $recipeId);
-            $stmt->bindParam(':ingredientId', $ingredientId);
-            $stmt->bindParam(':quantity', $quantity);
-            $stmt->execute();
+        // Check if recipe exists
+        if (!$recipe) {
+            return $response->withStatus(404)->write("Recipe not found");
         }
 
-        return $response->withJson(['message' => 'Recipe added successfully']);
-    } catch (\InvalidArgumentException $e) {
-        return $response->withStatus(400)->write($e->getMessage());
+        // Query database to retrieve ingredients for the recipe
+        $ingredientStatement = $this->pdo->prepare($ingredientQuery);
+        $ingredientStatement->execute(['recipeId' => $recipeId]);
+        $ingredients = $ingredientStatement->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Add the ingredients to the recipe details
+        $recipe['ingredients'] = $ingredients;
+
+        // Remove the redundant ingredient name and quantity from the recipe details
+        unset($recipe['ingredient_name']);
+        unset($recipe['quantity']);
+
+        // Return the recipe with ingredients as JSON
+        return $response->withJson($recipe);
     } catch (\PDOException $e) {
         // Handle database errors
         return $response->withStatus(500)->write("Database error: " . $e->getMessage());
@@ -232,11 +165,138 @@ final class RecipeHandler
 }
 
 
+    public function getRecipesByIngredient($request, $response, $filterId)
+    {
+        try {
+            // Get the SQL query for retrieving recipes by ingredient
+            $query = Ingredient::getRecipesByIngredientQuery();
+    
+            // Query database to retrieve recipes by ingredient
+            $statement = $this->pdo->prepare($query);
+            $statement->execute(['ingredient' => "$filterId"]); // Use 'ingredient' instead of 'ingredientId'
+            $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
+    
+            // Check if any recipes are found
+            if (empty($recipes)) {
+                // Return custom response if no recipes are found for the ingredient
+                return $response->withStatus(404)->write("No recipes found for the specified ingredient.");
+            }
+                // Group recipes by ID and combine their ingredients
+                $groupedRecipes = [];
+                foreach ($recipes as $recipe) {
+                    $recipeId = $recipe['id'];
+                    if (!isset($groupedRecipes[$recipeId])) {
+                        $groupedRecipes[$recipeId] = $recipe;
+                        $groupedRecipes[$recipeId]['ingredients'] = [];
+                    }
+                    if (!empty($recipe['ingredient_name'])) {
+                        $groupedRecipes[$recipeId]['ingredients'][] = [
+                            'name' => $recipe['ingredient_name'],
+                            'quantity' => $recipe['quantity']
+                        ];
+                    }
+                    // Unset unnecessary field
+                    unset($groupedRecipes[$recipeId]['ingredient_name']);
+                    unset($groupedRecipes[$recipeId]['quantity']);
+                }
+         
+                // Return the recipes as JSON
+                return $response->withJson(array_values($groupedRecipes));
+        } catch (\PDOException $e) {
+            // Handle database errors
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
+    
+    public function addRecipe($request, $response, $args)
+    {
+        try {
+            
+            $parsedBody = $request->getParsedBody();
+            // Checking if all required fields are present
+            $requiredFields = ['imageId', 'description', 'title', 'steps', 'categoryId', 'userId', 'ingredients'];
+            foreach ($requiredFields as $field) {
+                if (!isset($parsedBody[$field])) {
+                    throw new \InvalidArgumentException("Missing required field: $field");
+                }
+            }
+            $currentDate = date('Y-m-d');
+
+            $recipeDetails = [
+                'imageId' => $parsedBody['imageId'],
+                'description' => $parsedBody['description'],
+                'title' => $parsedBody['title'],
+                'steps' => $parsedBody['steps'],
+                'categoryId' => $parsedBody['categoryId'],
+                'date' => $currentDate,
+                'userId' => $parsedBody['userId']
+            ];
+
+            // Prepare the SQL statement to add a recipe
+            $sql = Recipe::addRecipeQuery();
+            $statement = $this->pdo->prepare($sql);
+
+            $statement->bindParam(':imageId', $recipeDetails['imageId']);
+            $statement->bindParam(':description', $recipeDetails['description']);
+            $statement->bindParam(':title', $recipeDetails['title']);
+            $statement->bindParam(':steps', $recipeDetails['steps']);
+            $statement->bindParam(':categoryId', $recipeDetails['categoryId']);
+            $statement->bindParam(':date', $recipeDetails['date']);
+            $statement->bindParam(':userId', $recipeDetails['userId']);
+
+            $statement->execute();
+
+            // Get the ID of the newly inserted recipe
+            $recipeId = $this->pdo->lastInsertId();
+
+            // Add ingredients to the recipe
+            $ingredients = $parsedBody['ingredients'];
+            foreach ($ingredients as $ingredient) {
+                $ingredientName = $ingredient['name'];
+                $quantity = $ingredient['quantity'];
+
+                // Check if the ingredient already exists in the database
+                $sql = Ingredient :: checkIngredientQuery();
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':name', $ingredientName);
+                $stmt->execute();
+                $existingIngredient = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+                if ($existingIngredient) {
+                    $ingredientId = $existingIngredient['id'];
+                } else {
+                    // Insert the new ingredient
+                    $sql = Ingredient::addIngredientQuery();
+                    $stmt = $this->pdo->prepare($sql);
+                    $stmt->bindParam(':name', $ingredientName);
+                    $stmt->execute();
+                    $ingredientId = $this->pdo->lastInsertId();
+                }
+
+                // Link the ingredient to the recipe
+                $sql = Recipe::addRecipeIngredientQuery();
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':recipeId', $recipeId);
+                $stmt->bindParam(':ingredientId', $ingredientId);
+                $stmt->bindParam(':quantity', $quantity);
+                $stmt->execute();
+            }
+
+            return $response->withJson(['message' => 'Recipe added successfully']);
+        } catch (\InvalidArgumentException $e) {
+            return $response->withStatus(400)->write($e->getMessage());
+        } catch (\PDOException $e) {
+            // Handle database errors
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
+
+
 public function updateRecipe($request, $response, $args)
 {
     try {
         $parsedBody = $request->getParsedBody();
-        $recipeId = $args['recipeId'];
+        $recipeId = $args['id'];
         $currentDate = date('Y-m-d');
 
         // Prepare the SQL statement to update a recipe
@@ -264,37 +324,36 @@ public function updateRecipe($request, $response, $args)
 }
 
 private function updateRecipeIngredients($recipeId, $ingredients)
-{
-    foreach ($ingredients as $ingredient) {
-        $ingredientName = $ingredient['name'];
-        $quantity = $ingredient['quantity'];
+    {
+        foreach ($ingredients as $ingredient) {
+            $ingredientName = $ingredient['name'];
+            $quantity = $ingredient['quantity'];
 
-        // Check if the ingredient already exists in the database
-        $sql = Ingredient::checkIngredientQuery();
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':name', $ingredientName);
-        $stmt->execute();
-        $existingIngredient = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($existingIngredient) {
-            $ingredientId = $existingIngredient['id'];
-        } else {
-            // Insert the new ingredient
-            $sql = Ingredient::addIngredientQuery();
+            // Check if the ingredient already exists in the database
+            $sql = Ingredient::checkIngredientQuery();
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':name', $ingredientName);
             $stmt->execute();
-            $ingredientId = $this->pdo->lastInsertId();
+            $existingIngredient = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($existingIngredient) {
+                $ingredientId = $existingIngredient['id'];
+            } else {
+                // Insert the new ingredient
+                $sql = Ingredient::addIngredientQuery();
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':name', $ingredientName);
+                $stmt->execute();
+                $ingredientId = $this->pdo->lastInsertId();
+            }
+
+            // Link the ingredient to the recipe
+            $sql = Recipe::updateRecipeIngredientQuery();
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':recipeId', $recipeId);
+            $stmt->bindParam(':ingredientId', $ingredientId);
+            $stmt->bindParam(':quantity', $quantity);
+            $stmt->execute();
         }
-
-        // Link the ingredient to the recipe
-        $sql = Recipe::updateRecipeIngredientQuery();
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':recipeId', $recipeId);
-        $stmt->bindParam(':ingredientId', $ingredientId);
-        $stmt->bindParam(':quantity', $quantity);
-        $stmt->execute();
     }
-}
-
 }

@@ -7,7 +7,19 @@ final class Ingredient
 {
     public static function getRecipesByIngredientQuery(): string
     {
-        return "SELECT * FROM recipes WHERE list_ingredients LIKE '%' || :ingredient || '%'";
+        return "SELECT recipes.*, ingredients.name AS ingredient_name, recipes_has_ingredients.quantity 
+        FROM recipes 
+        LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.id_recipe
+        LEFT JOIN ingredients ON recipes_has_ingredients.id_ingredient = ingredients.id WHERE ingredients.id = :ingredient";
+    }
+
+    public static function getIngredientsByRecipeIdQuery(): string
+    {
+        return "SELECT ingredients.name, recipes_has_ingredients.quantity
+        FROM ingredients
+        JOIN recipes_has_ingredients ON ingredients.id = recipes_has_ingredients.id_ingredient
+        WHERE recipes_has_ingredients.id_recipe = :recipeId;
+        ";
     }
 
     public static function checkIngredientQuery(): string
@@ -18,33 +30,5 @@ final class Ingredient
     public static function addIngredientQuery(): string
     {
         return "INSERT INTO ingredients (name) VALUES (:name)";
-    }
-
-    public static function getRecipesByIngredientQueryy(): string
-    {
-        return "
-        SELECT 
-        recipes.id, 
-        recipes.title, 
-        recipes.description, 
-        recipes.steps, 
-        recipes.category_id, 
-        recipes.date, 
-        recipes.user_id, 
-        ingredients.name AS ingredient_name, 
-        recipes_has_ingredients.quantity
-    FROM 
-        recipes
-    INNER JOIN 
-        recipes_has_ingredients ON recipes.id = recipes_has_ingredients.recipe_id
-    INNER JOIN 
-        ingredients ON recipes_has_ingredients.ingredient_id = ingredients.id
-    WHERE 
-        ingredients.name LIKE :ingredient
-        ";
-    }
-    
-    
-    
-    
+    }    
 }

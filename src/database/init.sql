@@ -20,7 +20,8 @@ CREATE TABLE recipes (
     title VARCHAR(100),
     steps TEXT,
     category_id INT REFERENCES category(category_id),
-    date DATE
+    date DATE,
+    user_id INT REFERENCES "user"(id)
 );
 -- Table: favorites
 CREATE TABLE favorites (
@@ -50,6 +51,9 @@ CREATE TABLE shopping_list (
     ingredients TEXT,
     date_created DATE
 );
+
+ALTER TABLE recipes_has_ingredients
+ALTER COLUMN quantity TYPE VARCHAR(50);
 
 
 

@@ -21,7 +21,7 @@ final class UserHandler
     {
         try {
             // Extract user ID from the route parameters
-            $userId = $args['userId'];
+            $userId = $args['id'];
 
             // Get the SQL query for retrieving a user by their ID
             $query = User::getUserByIdQuery();
@@ -79,7 +79,7 @@ final class UserHandler
     {
         try {
             $data = $request->getParsedBody();
-            $userId = $args['userId'];
+            $userId = $args['id'];
 
             if (empty($userId)) {
                 return $response->withStatus(404)->write("User ID is missing");
@@ -120,7 +120,7 @@ final class UserHandler
     public function deleteUser($request, $response, $args)
     {
         try {
-            $userId = $args['userId'];
+            $userId = $args['id'];
             //if user not found
             if (empty($userId)) {
                 return $response->withStatus(404)->write("User Id not provided");
