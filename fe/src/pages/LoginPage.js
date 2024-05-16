@@ -1,3 +1,5 @@
+// src/pages/LoginPage.js
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
@@ -7,7 +9,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import axios from "axios";
+import handleLogin from "../api/postUserLogin"; // Import the handleLogin function
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -19,27 +21,6 @@ const LoginPage = () => {
   const [openError, setOpenError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:8080/login", {
-        email,
-        password,
-      });
-      console.log(response.data); // Log server response
-      if (response.data.status === "success") {
-        navigate("/");
-      } else {
-        setErrorMessage(response.data.message);
-        setOpenError(true);
-      }
-    } catch (error) {
-      console.error("Login error:", error); // Log error
-      setErrorMessage(error.response && error.response.data ? error.response.data.message : error.message);
-      setOpenError(true);
-    }
-  };
 
   const signUpButtonStyle = {
     backgroundColor: "#f0f0f0", // Fundal gri deschis
@@ -57,6 +38,11 @@ const LoginPage = () => {
     color: "#ffffff", // Text alb
   };
 
+  const handleLoginWrapper = async (e) => {
+    e.preventDefault();
+    await handleLogin(email, password, setOpenError, setErrorMessage, navigate);
+  };
+
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>
       <Card sx={{ maxWidth: 400 }}>
@@ -64,7 +50,7 @@ const LoginPage = () => {
           <Typography variant="h5" component="div">
             Login
           </Typography>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleLoginWrapper}>
             <TextField
               fullWidth
               label="Email"

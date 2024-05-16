@@ -1,3 +1,5 @@
+// src/pages/SignUpPage.js
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
@@ -7,7 +9,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import axios from "axios";
+import handleSignUp from "../api/postUserSignUp"; // Import the handleSignUp function
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -22,28 +24,6 @@ const SignUpPage = () => {
   const [openError, setOpenError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("http://localhost:8080/user/", {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        password,
-      });
-      if (response.data.message === "User added successfully") {
-        setOpenSuccess(true);
-        setTimeout(() => navigate("/login"), 2000); // Redirect după 2 secunde
-      } else {
-        setErrorMessage(response.data.message);
-        setOpenError(true);
-      }
-    } catch (error) {
-      setErrorMessage(error.response ? error.response.data.message : error.message);
-      setOpenError(true);
-    }
-  };
 
   const loginButtonStyle = {
     backgroundColor: "#f0f0f0", // Fundal gri deschis
@@ -61,6 +41,11 @@ const SignUpPage = () => {
     color: "#ffffff", // Text alb
   };
 
+  const handleSignUpWrapper = async (e) => {
+    e.preventDefault();
+    await handleSignUp(firstName, lastName, email, password, setOpenSuccess, setOpenError, setErrorMessage, navigate);
+  };
+
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>
       <Card sx={{ maxWidth: 400 }}>
@@ -68,7 +53,7 @@ const SignUpPage = () => {
           <Typography variant="h5" component="div">
             Sign Up
           </Typography>
-          <form onSubmit={handleSignUp}>
+          <form onSubmit={handleSignUpWrapper}>
             <TextField
               fullWidth
               label="First Name"
