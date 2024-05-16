@@ -10,12 +10,15 @@ return function ($app) {
    
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
-        $app->post('', '\App\Services\RecipeHandler:addRecipe'); // este
-        $app->get('', '\App\Services\RecipeHandler:getFilteredRecipes'); // este
-        $app->put('/{id}', '\App\Services\RecipeHandler:updateRecipe'); // este
-        $app->get('/{id}', '\App\Services\RecipeHandler:getRecipeById'); // este
+        $app->get('/categories', '\App\Services\RecipeHandler:getCategories');
+        $app->get('/ingredients', '\App\Services\RecipeHandler:getIngredients');
+        $app->get('/{id}', '\App\Services\RecipeHandler:getRecipeById'); 
+        $app->post('', '\App\Services\RecipeHandler:addRecipe');
+        $app->get('', '\App\Services\RecipeHandler:getFilteredRecipes'); 
+        $app->put('/{id}', '\App\Services\RecipeHandler:updateRecipe'); 
+        //$app->delete('/{id}', '\App\Services\RecipeHandler:deleteRecipe');
     });
-
+    
     // Users routes
     $app->group('/users', function () use ($app) {
         $app->post('/', '\App\Services\UserHandler:addUser'); //slim error 
@@ -31,12 +34,12 @@ return function ($app) {
         $app->delete('/{id}', '\App\Services\FavoritesHandler:deleteFavorite'); 
     });
     
+    //Shopping Lists routes
     $app->group('/shopping_lists', function () use ($app) {
         $app->get('/{id}', '\App\Services\ShoppingListHandler:getShoppingListId'); 
         $app->delete('/{id}', '\App\Services\ShoppingListHandler:deleteShoppingList'); 
     });
    
-
     //login post
     $app->post('/login', '\App\Services\UserHandler:login');
     return $app;

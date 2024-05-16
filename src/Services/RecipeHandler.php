@@ -356,4 +356,43 @@ private function updateRecipeIngredients($recipeId, $ingredients)
             $stmt->execute();
         }
     }
+
+
+    public function getCategories($request, $response, $args)
+    {
+        try {
+            $query = Category::getCategoriesQuery();
+
+            $statement = $this->pdo->prepare($query);
+            $statement->execute();
+            $categories = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($categories)) {
+                return $response->withStatus(404)->write("No categories found");
+            }
+
+            return $response->withJson($categories);
+        } catch (\PDOException $e) {
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
+
+    public function getIngredients($request, $response, $args)
+    {
+        try {
+            $query = Ingredient::getIngredientsQuery();
+
+            $statement = $this->pdo->prepare($query);
+            $statement->execute();
+            $ingredients = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($ingredients)) {
+                return $response->withStatus(404)->write("No ingredients found");
+            }
+
+            return $response->withJson($ingredients);
+        } catch (\PDOException $e) {
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
 }

@@ -12,5 +12,10 @@ final class Category
         LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.id_recipe
         LEFT JOIN ingredients ON recipes_has_ingredients.id_ingredient = ingredients.id WHERE category_id = :categoryId";
     }
+
+    public static function getCategoriesQuery(): string
+    {
+        return "SELECT * FROM category";
+    }
 }
 

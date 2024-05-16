@@ -31,4 +31,8 @@ final class Ingredient
     {
         return "INSERT INTO ingredients (name) VALUES (:name)";
     }    
+    public static function getIngredientsQuery(): string
+    {
+        return "SELECT * FROM ingredients";
+    }
 }
