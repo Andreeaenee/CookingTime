@@ -9,7 +9,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import handleSignUp from "../api/postUserSignUp"; // Import the handleSignUp function
+import { handleSignUp } from "../api/Users"; // Import the handleSignUp function
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
