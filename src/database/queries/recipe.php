@@ -7,14 +7,17 @@ final class Recipe
 {
     public static function getRecipeByIdQuery(): string
     {
-        return "SELECT * FROM recipes WHERE id = :recipeId";
+        return "SELECT recipes.*, ingredients.name AS ingredient_name, recipes_has_ingredients.quantity 
+        FROM recipes 
+        LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.id_recipe
+        LEFT JOIN ingredients ON recipes_has_ingredients.id_ingredient = ingredients.id WHERE recipes.id = :recipeId";
     }
     public static function getRecipesQuery(): string
     {
         return "SELECT recipes.*, ingredients.name AS ingredient_name, recipes_has_ingredients.quantity 
         FROM recipes 
-        LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.recipe_id 
-        LEFT JOIN ingredients ON recipes_has_ingredients.ingredient_id = ingredients.id";
+        LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.id_recipe
+        LEFT JOIN ingredients ON recipes_has_ingredients.id_ingredient = ingredients.id";
     }
 
     public static function addRecipeQuery(): string
@@ -39,7 +42,15 @@ final class Recipe
 
     public static function addRecipeIngredientQuery(): string
     {
-        return "INSERT INTO recipes_has_ingredients (recipe_id, ingredient_id, quantity) VALUES (:recipeId, :ingredientId, :quantity)";
+        return "INSERT INTO recipes_has_ingredients (id_recipe, id_ingredient, quantity) VALUES (:recipeId, :ingredientId, :quantity)";
+    }
+
+    public static function updateRecipeIngredientQuery(): string
+    {
+        return "INSERT INTO recipes_has_ingredients (id_recipe, id_ingredient, quantity) 
+                VALUES (:recipeId, :ingredientId, :quantity)
+                ON CONFLICT (id_recipe, id_ingredient) 
+                DO UPDATE SET quantity = EXCLUDED.quantity";
     }
 
 }

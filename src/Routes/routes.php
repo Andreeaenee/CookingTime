@@ -7,46 +7,44 @@ return function ($app) {
 
     // Setup route using the RouteService
     $app->get('/', '\App\Services\RouteService:helloWorld'); 
-
-
-    $app->group('/recipe', function () use ($app) {
-        $app->post('/', '\App\Services\RecipeHandler:addRecipe'); 
-        $app->put('/{recipeId}', '\App\Services\RecipeHandler:updateRecipe'); //slim error
-    });
    
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
-        $app->get('/', '\App\Services\RecipeHandler:getRecipes'); 
-        $app->get('/byCategory/{categoryId}', '\App\Services\RecipeHandler:getRecipesByCategoryId'); 
-        $app->get('/{recipeId}', '\App\Services\RecipeHandler:getRecipeById'); 
-        $app->get('/byIngredient/{ingredient_name}', '\App\Services\RecipeHandler:getRecipesByIngredient');  
-      
+        $app->get('/categories', '\App\Services\RecipeHandler:getCategories');
+        $app->get('/ingredients', '\App\Services\RecipeHandler:getIngredients');
+        $app->get('/{id}', '\App\Services\RecipeHandler:getRecipeById'); 
+        $app->post('', '\App\Services\RecipeHandler:addRecipe');
+        $app->get('', '\App\Services\RecipeHandler:getFilteredRecipes'); 
+        $app->put('/{id}', '\App\Services\RecipeHandler:updateRecipe'); 
+        //$app->delete('/{id}', '\App\Services\RecipeHandler:deleteRecipe');
     });
-
+    
     // Users routes
+    // Single user routes
     $app->group('/user', function () use ($app) {
         $app->post('/', '\App\Services\UserHandler:addUser'); //slim error FIXed IT
         $app->put('/{userId}', '\App\Services\UserHandler:updateUser'); 
     });
+
+    // Group for users routes
     $app->group('/users', function () use ($app) {
-        $app->get('/users/{userId}', '\App\Services\UserHandler:getUserById'); 
+        $app->get('/{userId}', '\App\Services\UserHandler:getUserById'); 
         $app->delete('/{userId}', '\App\Services\UserHandler:deleteUser'); 
     });
 
-   
-    //Favorites routes
-    $app->post('/favorite', '\App\Services\FavoritesHandler:addFavorite');    
+    //Favorites routes  
     $app->group('/favorites', function () use ($app) {
-        $app->get('/', '\App\Services\FavoritesHandler:getFavorite'); 
-        $app->delete('/{Id}', '\App\Services\FavoritesHandler:deleteFavorite'); 
+        $app->post('', '\App\Services\FavoritesHandler:addFavorite');
+        $app->get('', '\App\Services\FavoritesHandler:getFavorite'); 
+        $app->delete('/{id}', '\App\Services\FavoritesHandler:deleteFavorite'); 
     });
     
-    $app->group('/shopping_list', function () use ($app) {
+    //Shopping Lists routes
+    $app->group('/shopping_lists', function () use ($app) {
         $app->get('/{id}', '\App\Services\ShoppingListHandler:getShoppingListId'); 
         $app->delete('/{id}', '\App\Services\ShoppingListHandler:deleteShoppingList'); 
     });
    
-
     //login post
     $app->post('/login', '\App\Services\UserHandler:login');
     return $app;

@@ -78,7 +78,7 @@ final class FavoritesHandler
     public function deleteFavorite($request, $response, $args)
     {
         try {
-            $id = $args['Id'];
+            $id = $args['id'];
 
             if (empty($id)) {
                 return $response->withStatus(404)->write("ID is missing");
