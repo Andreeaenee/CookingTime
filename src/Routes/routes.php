@@ -18,16 +18,12 @@ return function ($app) {
         $app->put('/{id}', '\App\Services\RecipeHandler:updateRecipe'); 
         //$app->delete('/{id}', '\App\Services\RecipeHandler:deleteRecipe');
     });
-    
-    // Users routes
-    // Single user routes
-    $app->group('/user', function () use ($app) {
-        $app->post('/', '\App\Services\UserHandler:addUser'); //slim error FIXed IT
-        $app->put('/{userId}', '\App\Services\UserHandler:updateUser'); 
-    });
+
 
     // Group for users routes
     $app->group('/users', function () use ($app) {
+        $app->post('', '\App\Services\UserHandler:addUser');
+        $app->put('/{userId}', '\App\Services\UserHandler:updateUser'); 
         $app->get('/{userId}', '\App\Services\UserHandler:getUserById'); 
         $app->delete('/{userId}', '\App\Services\UserHandler:deleteUser'); 
     });
