@@ -11,6 +11,7 @@ import RecipesPage from "./pages/RecipesPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import RecipeDetails from './pages/RecipeDetails';
+import ShoppingList from './pages/ShoppingList';
 
 function App() {
   return (
@@ -30,7 +31,8 @@ function App() {
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetails />} />
           <Route element={<div>Favorites</div>} />
-          <Route element={<div>Shopping List</div>} />
+          <Route path='/shopping-list' element={<ShoppingList />} />
+
         </Route>
       </Routes>
     </Router>

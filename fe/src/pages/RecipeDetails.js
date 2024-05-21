@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Wrapper from '../components/Wrapper';
 import { fetchRecipeDetails } from '../api/getRecipes';
+import { getShoppingLists, updateShoppingList } from '../api/getShoppingLists';
 import {
   Box,
   Grid,
@@ -10,8 +11,10 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemText,
   IconButton,
+  Menu,
+  MenuItem,
+  Button,
 } from '@mui/material';
 import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
@@ -20,6 +23,8 @@ import FoodPhoto from '../assets/photos/Photo.jpeg';
 const RecipeDetails = () => {
   const [data, setData] = useState({});
   const [isFavorite, setIsFavorite] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [shoppingList, setShoppingList] = useState([]);
   const { id } = useParams();
 
   useEffect(() => {
@@ -31,11 +36,36 @@ const RecipeDetails = () => {
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
-    console.log('Data', data);
+    getShoppingLists()
+      .then((response) => {
+        setShoppingList(response);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+      });
   }, [id]);
 
   const handleFavoriteToggle = () => {
     setIsFavorite(!isFavorite);
+  };
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleAddToShoppingList = (listId) => {
+    console.log('Recipe ', data);
+    const sendData = {
+      ingredients: JSON.stringify(data.ingredients),
+    };
+    updateShoppingList(sendData, listId);
+    // Logic to add ingredients to the selected shopping list goes here
+    console.log('Adding ingredients to shopping list with ID:', listId);
+    handleMenuClose();
   };
 
   return (
@@ -48,7 +78,7 @@ const RecipeDetails = () => {
           marginRight: '30px',
         }}
       >
-        <Box my={4}>
+        <Box my={4} sx={{ marginRight: '100px', marginLeft: '50px' }}>
           <Box
             display="flex"
             alignItems="center"
@@ -130,6 +160,34 @@ const RecipeDetails = () => {
                       </ListItem>
                     ))}
                 </List>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleMenuOpen}
+                  sx={{
+                    marginTop: '16px',
+                    backgroundColor: '#8361F7',
+                    '&:hover': { backgroundColor: '#303f9f' },
+                    fontWeight: 'bold',
+                    padding: '10px 20px',
+                  }}
+                >
+                  Add to shopping list
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  {shoppingList.map((list) => (
+                    <MenuItem
+                      key={list.id}
+                      onClick={() => handleAddToShoppingList(list.id)}
+                    >
+                      {list.name}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </Box>
             </Grid>
           </Grid>
