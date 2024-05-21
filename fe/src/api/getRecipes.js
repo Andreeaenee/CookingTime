@@ -141,6 +141,7 @@ export async function fetchFavoriteRecipesByIngredients(ingredient, userId) {
     console.log('Error: ', error);
     throw error;
   }
+}
   
 export async function fetchRecipeDetails(id) {
   try {
