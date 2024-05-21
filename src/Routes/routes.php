@@ -40,7 +40,10 @@ return function ($app) {
     });
     
     //Shopping Lists routes
-    $app->group('/shopping_lists', function () use ($app) {
+    $app->group('/shoppingLists', function () use ($app) {
+        $app->post('', '\App\Services\ShoppingListHandler:addShoppingList');
+        $app->get('', '\App\Services\ShoppingListHandler:getShoppingList');
+        $app->put('/{id}', '\App\Services\ShoppingListHandler:updateShoppingList');
         $app->get('/{id}', '\App\Services\ShoppingListHandler:getShoppingListId'); 
         $app->delete('/{id}', '\App\Services\ShoppingListHandler:deleteShoppingList'); 
     });

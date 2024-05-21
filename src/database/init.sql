@@ -55,6 +55,8 @@ CREATE TABLE shopping_list (
 ALTER TABLE recipes_has_ingredients
 ALTER COLUMN quantity TYPE VARCHAR(50);
 
+ALTER TABLE shopping_list
+ADD COLUMN name VARCHAR(100);
 
 
 
