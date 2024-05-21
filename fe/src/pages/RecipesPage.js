@@ -4,10 +4,12 @@ import {
   fetchRecipesByCategory,
   fetchRecipesByIngredients,
   fetchRecipesData,
+  fetchCategories,
 } from '../api/getRecipes';
 import RecipeCard from '../components/RecipeCard';
 import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
+import { Grid, Container, Typography } from '@mui/material';
 
 const RecipesPage = () => {
   const [data, setData] = useState([]);
@@ -72,41 +74,25 @@ const RecipesPage = () => {
 
   return (
     <Wrapper>
-      <div
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: 4,
-          marginBottom: 2,
-        }}
-      >
         <div
-          sx={{
+          style={{
             display: 'flex',
-
             alignItems: 'flex-end',
+            marginBottom: '20px',
           }}
         >
-          <div style={{ display: 'flex' }}>
-            <SearchBar onSearch={handleSearch} />
-            <div style={{ marginLeft: '10px' }}>
-              <FilterButton onFilterClick={handleFilter} />
-            </div>
+          <SearchBar onSearch={handleSearch} />
+          <div style={{ marginLeft: '10px' }}>
+            <FilterButton onFilterClick={handleFilter} />
           </div>
         </div>
-        <div
-          sx={{
-            width: '100%',
-            maxWidth: 600,
-            marginTop: 2,
-          }}
-        >
+        <Grid container spacing={4}>
           {filteredData.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <Grid item xs={12} sm={6} md={4} key={recipe.id}>
+              <RecipeCard recipe={recipe} />
+            </Grid>
           ))}
-        </div>
-      </div>
+        </Grid>
     </Wrapper>
   );
 };

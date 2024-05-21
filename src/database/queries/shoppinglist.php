@@ -14,4 +14,19 @@ final class ShoppingList
     {
         return "DELETE FROM shopping_list WHERE id = :id";
     }
+
+    public static function addShoppingListQuery(): string
+    {
+        return "INSERT INTO shopping_list (user_id, name) VALUES (:user_id, :name)";
+    }
+
+    public static function getShoppingListQuery(): string
+    {
+        return "SELECT * FROM shopping_list";
+    }
+
+    public static function updateShoppingListQuery(): string
+    {
+        return "UPDATE shopping_list SET ingredients = :ingredients WHERE id = :id";
+    }
 }

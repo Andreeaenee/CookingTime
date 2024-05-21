@@ -135,6 +135,18 @@ export async function fetchFavoriteRecipesByIngredients(ingredient, userId) {
     const response = await axiosFetch({
       method: 'GET',
       url: `http://localhost:8080/favorites?filter=ingredient&id=${ingredient}&userId=${userId}`,
+       });
+    return response.responseData;
+  } catch (error) {
+    console.log('Error: ', error);
+    throw error;
+  }
+  
+export async function fetchRecipeDetails(id) {
+  try {
+    const response = await axiosFetch({
+      method: 'GET',
+      url: `http://localhost:8080/recipes/${id}`,
     });
     return response.responseData;
   } catch (error) {
