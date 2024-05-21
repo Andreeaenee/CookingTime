@@ -1,19 +1,21 @@
-import logo from "./logo.svg";
-import "./App.css";
-import Sidebar from "./components/Sidebar";
+import logo from './logo.svg';
+import './App.css';
+import Sidebar from './components/Sidebar';
 import {
   BrowserRouter as Router,
   Route,
   Routes,
   Outlet,
-} from "react-router-dom";
-import RecipesPage from "./pages/RecipesPage";
-import LoginPage from "./pages/LoginPage";
+} from 'react-router-dom';
+import RecipesPage from './pages/RecipesPage';
+import LoginPage from './pages/LoginPage';
+import RecipeDetails from './pages/RecipeDetails';
+
 function App() {
   return (
     <Router>
       <Routes>
-      <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route
           element={
             <div>
@@ -23,8 +25,8 @@ function App() {
           }
         >
           <Route path="/" element={<RecipesPage />} />
-
-          <Route element={<div>My Recipes</div>} />
+          <Route path="/recipes" element={<RecipesPage />} />
+          <Route path="/recipes/:id" element={<RecipeDetails />} />
           <Route element={<div>Favorites</div>} />
           <Route element={<div>Shopping List</div>} />
         </Route>

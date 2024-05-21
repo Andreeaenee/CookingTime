@@ -64,3 +64,16 @@ export async function fetchRecipesByIngredients(ingredient) {
     throw error;
   }
 }
+
+export async function fetchRecipeDetails(id) {
+  try {
+    const response = await axiosFetch({
+      method: 'GET',
+      url: `http://localhost:8080/recipes/${id}`,
+    });
+    return response.responseData;
+  } catch (error) {
+    console.log('Error: ', error);
+    throw error;
+  }
+}
