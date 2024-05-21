@@ -20,11 +20,16 @@ return function ($app) {
     });
     
     // Users routes
+    // Single user routes
+    $app->group('/user', function () use ($app) {
+        $app->post('/', '\App\Services\UserHandler:addUser'); //slim error FIXed IT
+        $app->put('/{userId}', '\App\Services\UserHandler:updateUser'); 
+    });
+
+    // Group for users routes
     $app->group('/users', function () use ($app) {
-        $app->post('/', '\App\Services\UserHandler:addUser'); //slim error 
-        $app->put('/{id}', '\App\Services\UserHandler:updateUser'); 
-        $app->get('/{id}', '\App\Services\UserHandler:getUserById'); 
-        $app->delete('/{id}', '\App\Services\UserHandler:deleteUser'); 
+        $app->get('/{userId}', '\App\Services\UserHandler:getUserById'); 
+        $app->delete('/{userId}', '\App\Services\UserHandler:deleteUser'); 
     });
 
     //Favorites routes  

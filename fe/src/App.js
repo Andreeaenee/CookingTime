@@ -6,16 +6,18 @@ import {
   Route,
   Routes,
   Outlet,
-} from 'react-router-dom';
-import RecipesPage from './pages/RecipesPage';
-import LoginPage from './pages/LoginPage';
+} from "react-router-dom";
+import RecipesPage from "./pages/RecipesPage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
 import RecipeDetails from './pages/RecipeDetails';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
         <Route
           element={
             <div>
