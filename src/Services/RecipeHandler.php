@@ -35,12 +35,49 @@ final class RecipeHandler
             case 'ingredient':
                 return $this->getRecipesByIngredient($request, $response, $filterId);
                 break;
+            case 'user':
+                return $this->getRecipesByUserId($request, $response, $filterId);
+                break;
             default:
                 return $this->getRecipes($request, $response, $args);
                 break;
         }
     }
+public function getRecipesByUserId($request, $response, $filterId)
+{
+    try{
+    $query = Recipe::getRecipeByUserQuery();
+    $statement = $this->pdo->prepare($query);
+    $statement->execute(['userId' => $filterId]);
+    $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
+    if (empty($recipes)) {
+        return $response->withStatus(404)->write("No recipes found for the given user ID.");
+    }
+    $groupedRecipes = [];
+    foreach ($recipes as $recipe) {
+        $recipeId = $recipe['id'];
+        if (!isset($groupedRecipes[$recipeId])) {
+            $groupedRecipes[$recipeId] = $recipe;
+            $groupedRecipes[$recipeId]['ingredients'] = [];
+        }
+        if (!empty($recipe['ingredient_name'])) {
+            $groupedRecipes[$recipeId]['ingredients'][] = [
+                'name' => $recipe['ingredient_name'],
+                'quantity' => $recipe['quantity']
+            ];
+        }
+        // Unset unnecessary field
+        unset($groupedRecipes[$recipeId]['ingredient_name']);
+        unset($groupedRecipes[$recipeId]['quantity']);
+    }
 
+    // Return the recipes as JSON
+    return $response->withJson(array_values($groupedRecipes));
+} catch (\PDOException $e) {
+    return $response->withStatus(500)->write($e->getMessage());
+}
+
+}
 
     public function getRecipes($request, $response, $args)
     {

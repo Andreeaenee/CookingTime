@@ -53,4 +53,13 @@ final class Recipe
                 DO UPDATE SET quantity = EXCLUDED.quantity";
     }
 
+    public static function getRecipeByUserQuery(): string
+    {
+        return "SELECT recipes.*, ingredients.name AS ingredient_name, recipes_has_ingredients.quantity 
+        FROM recipes 
+        LEFT JOIN recipes_has_ingredients ON recipes.id = recipes_has_ingredients.id_recipe
+        LEFT JOIN ingredients ON recipes_has_ingredients.id_ingredient = ingredients.id WHERE recipes.user_id = :userId";
+    }
+
 }
+
