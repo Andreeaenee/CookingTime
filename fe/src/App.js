@@ -10,6 +10,9 @@ import {
 import RecipesPage from "./pages/RecipesPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
+import MyRecipesPage from './pages/MyRecipesPage';
+import AddRecipePage from './pages/AddRecipePage';
+import FavoritesPage from './pages/FavoritesPage';
 import RecipeDetails from './pages/RecipeDetails';
 import ShoppingList from './pages/ShoppingList';
 
@@ -29,9 +32,12 @@ function App() {
         >
           <Route path="/" element={<RecipesPage />} />
           <Route path="/recipes" element={<RecipesPage />} />
+          <Route path="/my-recipes" element={<MyRecipesPage />} />
+          <Route path="/add-recipe" element={<AddRecipePage />} />         
+          <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/recipes/:id" element={<RecipeDetails />} />
-          <Route element={<div>Favorites</div>} />
           <Route path='/shopping-list' element={<ShoppingList />} />
+
 
         </Route>
       </Routes>
