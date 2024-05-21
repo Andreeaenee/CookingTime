@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const handleSignUp = async (firstName, lastName, email, password, setOpenSuccess, setOpenError, setErrorMessage, navigate) => {
   try {
-    const response = await axios.post("http://localhost:8080/user/", {
+    const response = await axios.post("http://localhost:8080/users", {
       first_name: firstName,
       last_name: lastName,
       email,
