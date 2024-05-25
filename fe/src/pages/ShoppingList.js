@@ -45,8 +45,8 @@ const ShoppingList = () => {
     };
     postShoppingList(data);
     handleClose();
+    window.location.reload();
   };
-  console.log('Shopping Data', data);
 
   return (
     <Wrapper>

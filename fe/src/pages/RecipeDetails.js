@@ -62,7 +62,7 @@ const RecipeDetails = () => {
     const sendData = {
       ingredients: JSON.stringify(data.ingredients),
     };
-    updateShoppingList(sendData, listId);
+    updateShoppingList(sendData, listId, true);
     // Logic to add ingredients to the selected shopping list goes here
     console.log('Adding ingredients to shopping list with ID:', listId);
     handleMenuClose();

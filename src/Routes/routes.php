@@ -6,7 +6,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 return function ($app) {
 
     // Setup route using the RouteService
-    $app->get('/', '\App\Services\RouteService:helloWorld'); 
+    //$app->get('/', '\App\Services\RouteService:helloWorld'); 
    
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {

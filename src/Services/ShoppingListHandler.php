@@ -112,6 +112,8 @@ final class ShoppingListHandler
     {
         try {
             $id = $args['id'];
+            $queryParams = $request->getQueryParams();
+            $filter = $queryParams['combine'] ?? null;
             $data = $request->getParsedBody();
             $newIngredients = $data['ingredients'] ?? '';
     
@@ -119,35 +121,54 @@ final class ShoppingListHandler
                 return $response->withStatus(400)->write("Missing required fields");
             }
     
-            // Fetch the existing ingredients
-            $query = "SELECT ingredients FROM shopping_list WHERE id = :id";
-            $statement = $this->pdo->prepare($query);
-            $statement->execute(['id' => $id]);
-            $existingIngredients = $statement->fetchColumn();
-    
-            if ($existingIngredients === false) {
-                return $response->withStatus(404)->write("Shopping list not found");
+            // Ensure newIngredients is in JSON format
+            if (is_string($newIngredients)) {
+                $newIngredientsArray = json_decode($newIngredients, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return $response->withStatus(400)->write("Invalid JSON format for new ingredients");
+                }
+            } else {
+                $newIngredientsArray = $newIngredients;
             }
     
-            // Decode the existing and new ingredients
-            $existingIngredientsArray = json_decode($existingIngredients, true) ?? [];
-            $newIngredientsArray = json_decode($newIngredients, true) ?? [];
+            if ($filter === 'true') {
+                // Fetch the existing ingredients
+                $query = "SELECT ingredients FROM shopping_list WHERE id = :id";
+                $statement = $this->pdo->prepare($query);
+                $statement->execute(['id' => $id]);
+                $existingIngredients = $statement->fetchColumn();
     
-            // Merge the ingredients arrays
-            $mergedIngredientsArray = array_merge($existingIngredientsArray, $newIngredientsArray);
+                if ($existingIngredients === false) {
+                    return $response->withStatus(404)->write("Shopping list not found");
+                }
     
-            // Encode the merged ingredients back to JSON
-            $mergedIngredientsJson = json_encode($mergedIngredientsArray);
+                // Decode the existing ingredients
+                $existingIngredientsArray = json_decode($existingIngredients, true) ?? [];
     
-            // Update the shopping list with the new ingredients
-            $updateQuery = ShoppingList::updateShoppingListQuery();
-            $updateStatement = $this->pdo->prepare($updateQuery);
-            $updateStatement->execute(['id' => $id, 'ingredients' => $mergedIngredientsJson]);
+                // Merge the ingredients arrays
+                $mergedIngredientsArray = array_merge($existingIngredientsArray, $newIngredientsArray);
     
+                // Encode the merged ingredients back to JSON
+                $mergedIngredientsJson = json_encode($mergedIngredientsArray);
+    
+                // Update the shopping list with the new ingredients
+                $updateQuery = ShoppingList::updateShoppingListQuery();
+                $updateStatement = $this->pdo->prepare($updateQuery);
+                $updateStatement->execute(['id' => $id, 'ingredients' => $mergedIngredientsJson]);
+            } else {
+                // Encode the new ingredients back to JSON
+                $newIngredientsJson = json_encode($newIngredientsArray);
+    
+                // Update the shopping list with the new ingredients
+                $updateQuery = ShoppingList::updateShoppingListQuery();
+                $updateStatement = $this->pdo->prepare($updateQuery);
+                $updateStatement->execute(['id' => $id, 'ingredients' => $newIngredientsJson]);
+            }
             return $response->withStatus(204);
         } catch (\PDOException $e) {
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+    
     
 }
