@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Wrapper from '../components/Wrapper';
-import { fetchRecipeDetails, deleteRecipe, addToFavorites, removeFromFavorites } from '../api/getRecipes';
+import { fetchRecipeDetails } from '../api/getRecipes';
 import { getShoppingLists, updateShoppingList } from '../api/getShoppingLists';
 import {
   Box,
@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
-import DeleteIcon from '@mui/icons-material/Delete';
 import FoodPhoto from '../assets/photos/Photo.jpeg';
 
 const RecipeDetails = () => {
@@ -27,7 +26,6 @@ const RecipeDetails = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [shoppingList, setShoppingList] = useState([]);
   const { id } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRecipeDetails(id)
@@ -47,28 +45,8 @@ const RecipeDetails = () => {
       });
   }, [id]);
 
-  const handleFavoriteToggle = async () => {
+  const handleFavoriteToggle = () => {
     setIsFavorite(!isFavorite);
-    try {
-      if (!isFavorite) {
-        const response = await addToFavorites(id);
-        console.log('Recipe added to favorites:', response);
-      } else {
-        const response = await removeFromFavorites(id);
-        console.log('Recipe removed from favorites:', response);
-      }
-    } catch (error) {
-      console.error('Error toggling favorite status:', error);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteRecipe(id);
-      navigate('/recipes');
-    } catch (error) {
-      alert(`Error deleting the recipe: ${error.message}`);
-    }
   };
 
   const handleMenuOpen = (event) => {
@@ -80,10 +58,13 @@ const RecipeDetails = () => {
   };
 
   const handleAddToShoppingList = (listId) => {
+    console.log('Recipe ', data);
     const sendData = {
       ingredients: JSON.stringify(data.ingredients),
     };
-    updateShoppingList(sendData, listId, true);
+    updateShoppingList(sendData, listId);
+    // Logic to add ingredients to the selected shopping list goes here
+    console.log('Adding ingredients to shopping list with ID:', listId);
     handleMenuClose();
   };
 
@@ -111,18 +92,13 @@ const RecipeDetails = () => {
             >
               {data.title || 'Pasta with tomato'}
             </Typography>
-            <Box>
-              <IconButton onClick={handleFavoriteToggle}>
-                {isFavorite ? (
-                  <Favorite sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
-                ) : (
-                  <FavoriteBorder sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
-                )}
-              </IconButton>
-              <IconButton onClick={handleDelete}>
-                <DeleteIcon sx={{ color: '#f44336', fontSize: '2.5rem' }} />
-              </IconButton>
-            </Box>
+            <IconButton onClick={handleFavoriteToggle}>
+              {isFavorite ? (
+                <Favorite sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
+              ) : (
+                <FavoriteBorder sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
+              )}
+            </IconButton>
           </Box>
           <Grid container spacing={4}>
             <Grid item xs={12} md={8}>
@@ -132,7 +108,8 @@ const RecipeDetails = () => {
                 paragraph
                 sx={{ color: '#555', lineHeight: '1.6' }}
               >
-                {data.description || 'A light and refreshing pasta dish featuring fresh tomatoes, perfect for those hot summer days.'}
+                {data.description ||
+                  'A light and refreshing pasta dish featuring fresh tomatoes, perfect for those hot summer days.'}
               </Typography>
               <Box
                 component="img"
@@ -157,30 +134,31 @@ const RecipeDetails = () => {
                   Ingredients
                 </Typography>
                 <List>
-                  {data.ingredients && data.ingredients.map((ingredient, index) => (
-                    <ListItem
-                      key={index}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        padding: '8px 0',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
+                  {data.ingredients &&
+                    data.ingredients.map((ingredient, index) => (
+                      <ListItem
+                        key={index}
                         sx={{
-                          fontWeight: 'bold',
-                          color: '#333',
-                          marginRight: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          padding: '8px 0',
                         }}
                       >
-                        {ingredient.name}
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: '#555' }}>
-                        {ingredient.quantity}
-                      </Typography>
-                    </ListItem>
-                  ))}
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#333',
+                            marginRight: '8px',
+                          }}
+                        >
+                          {ingredient.name}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#555' }}>
+                          {ingredient.quantity}
+                        </Typography>
+                      </ListItem>
+                    ))}
                 </List>
                 <Button
                   variant="contained"
@@ -229,7 +207,10 @@ const RecipeDetails = () => {
               sx={{ color: '#555', lineHeight: '1.6' }}
             >
               <ol>
-                {data.steps && data.steps.split('\n').map((step, index) => <li key={index}>{step}</li>)}
+                {data.steps &&
+                  data.steps
+                    .split('\n')
+                    .map((step, index) => <li key={index}>{step}</li>)}
               </ol>
             </Typography>
           </Box>

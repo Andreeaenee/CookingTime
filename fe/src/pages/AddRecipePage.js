@@ -1,153 +1,215 @@
-import React, { useState } from 'react';
-import Wrapper from '../components/Wrapper';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Container, Typography, TextField, Button, Paper, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import axiosFetch from '../api/Axios';
+import { fetchRecipesCategory, fetchRecipesIngredients } from '../api/getRecipes';
 
 const AddRecipePage = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [steps, setSteps] = useState('');
-  const [userId, setUserId] = useState(2); // Example user ID
   const [image, setImage] = useState(null);
+  const [ingredients, setIngredients] = useState([{ id: '', quantity: '' }]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [ingredientsList, setIngredientsList] = useState([]);
 
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetchRecipesCategory();
+        setCategories(response);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+
+    const fetchIngredients = async () => {
+      try {
+        const response = await fetchRecipesIngredients();
+        setIngredientsList(response);
+      } catch (error) {
+        console.error('Error fetching ingredients:', error);
+      }
+    };
+    fetchIngredients();
+  }, []);
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImage(file);
+    }
+  };
+
+  const handleIngredientChange = (index, event) => {
+    const { name, value } = event.target;
+    const newIngredients = [...ingredients];
+    if (name === "quantity") {
+      newIngredients[index].quantity = value;
+    } else {
+      newIngredients[index].id = value; // Assign ingredient ID
+    }
+    setIngredients(newIngredients);
+    console.log('Ingredients:', ingredients);
+  };
+
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, { id: '', quantity: '' }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('steps', steps);
-    formData.append('user_id', userId);
-    if (image) {
-      formData.append('image', image);
-    }
+    formData.append('categoryId', parseInt(selectedCategory)); 
+    formData.append('userId', 2); 
+    formData.append('image_id', "1");
+
+    ingredients.forEach((ingredient, index) => {
+      formData.append(`ingredients[${index}][id]`, ingredient.id); // Add ingredient ID
+      formData.append(`ingredients[${index}][quantity]`, ingredient.quantity);
+    });
 
     try {
-      const response = await fetch('http://localhost:8080/api/recipes', {
+      const response = await axiosFetch({
         method: 'POST',
-        body: formData,
+        url: 'http://localhost:8080/recipes',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (response.ok) {
-        console.log('Recipe added successfully');
-        // Redirect to My Recipes page or clear form
-      } else {
-        console.error('Failed to add recipe');
-      }
+      console.log('Recipe added successfully:', response.data.message);
     } catch (error) {
       console.error('Error:', error);
     }
   };
-
+ 
   return (
-    <Wrapper>
-      <div style={styles.container}>
-        <h1 style={styles.heading}>Add Recipe</h1>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Title:</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+    <Container maxWidth="sm">
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Add Recipe
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Title"
+            fullWidth
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            margin="normal"
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            margin="normal"
+          />
+          <TextField
+            label="Steps"
+            fullWidth
+            multiline
+            rows={4}
+            value={steps}
+            onChange={(e) => setSteps(e.target.value)}
+            required
+            margin="normal"
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
               required
-              style={styles.input}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Description:</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              style={styles.textarea}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Steps:</label>
-            <textarea
-              value={steps}
-              onChange={(e) => setSteps(e.target.value)}
-              required
-              style={styles.textarea}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Image:</label>
-            <input
-              type="file"
-              onChange={handleImageChange}
-              required
-              style={styles.input}
-            />
-          </div>
-          <button type="submit" style={styles.button}>Save</button>
-          <Link to="/my-recipes" style={styles.link}>Go to My Recipes</Link>
+            >
+              <MenuItem key="" value="">Select a category</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem
+                  key={cat.category_id}
+                  value={cat.category_id}
+                >
+                  {cat.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {ingredients.map((ingredient, index) => (
+            <Box key={index} display="flex" mt={2}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Ingredient</InputLabel>
+                <Select
+                  value={ingredient.id}
+                  onChange={(e) => handleIngredientChange(index, e)}
+                  required
+                >
+                  <MenuItem key="" value="">Select an ingredient</MenuItem>
+                  {ingredientsList.map((ing) => (
+                    <MenuItem key={ing.id} value={ing.id}>{ing.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Quantity"
+                name="quantity"
+                value={ingredient.quantity}
+                onChange={(event) => handleIngredientChange(index, event)}
+                required
+                fullWidth
+                margin="normal"
+              />
+            </Box>
+          ))}
+          <Box mt={2}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleAddIngredient}
+            >
+              Add Ingredient
+            </Button>
+          </Box>
+          <Box mt={2}>
+            <Button
+              variant="contained"
+              component="label"
+            >
+              Upload Image
+              <input
+                type="file"
+                hidden
+                onChange={handleImageChange}
+              />
+            </Button>
+          </Box>
+          <Box mt={3}>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+            >
+              Save
+            </Button>
+          </Box>
         </form>
-      </div>
-    </Wrapper>
+        <Box mt={2} textAlign="center">
+          <Button component={Link} to="/my-recipes" variant="outlined" color="primary">
+            Go to My Recipes
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
 export default AddRecipePage;
-
-const styles = {
-  container: {
-    maxWidth: '600px',
-    margin: '0 auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  },
-  heading: {
-    fontSize: '24px',
-    marginBottom: '20px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    fontWeight: 'bold',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    fontSize: '16px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    width: '100%',
-    padding: '10px',
-    fontSize: '16px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    boxSizing: 'border-box',
-    height: '150px',
-  },
-  button: {
-    padding: '10px 20px',
-    fontSize: '16px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
-  link: {
-    display: 'block',
-    marginTop: '10px',
-    textAlign: 'center',
-    fontSize: '16px',
-    color: '#007bff',
-    textDecoration: 'none',
-  },
-};

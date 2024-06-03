@@ -61,5 +61,16 @@ final class Recipe
         LEFT JOIN ingredients ON recipes_has_ingredients.id_ingredient = ingredients.id WHERE recipes.user_id = :userId";
     }
 
+
+
+    public static function deleteRecipeQuery(): array
+{
+    return [
+        "DELETE FROM recipes_has_ingredients WHERE id_recipe = :recipeId",
+        "DELETE FROM favorites WHERE recipe_id = :recipeId",
+        "DELETE FROM recipes WHERE id = :recipeId"
+    ];
 }
 
+    
+}
