@@ -1,47 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import Wrapper from '../components/Wrapper';
-import { Link } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
 import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
-import {
-  fetchFavoriteRecipesByCategory,
-  fetchFavoriteRecipesByIngredients,
-  fetchFavoriteRecipesByUser,
-} from '../api/getRecipes';
+import { fetchFavoriteRecipesDetails, fetchFavoriteRecipesByCategory, fetchFavoriteRecipesByIngredients } from '../api/getRecipes';
 
 const FavoritesPage = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
   const userId = 2; // Replace with the actual user ID
 
   useEffect(() => {
-    fetchFavoriteRecipesByUser(userId)
-      .then((response) => {
-        setData(response);
-        setFilteredData(response);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
-    //   fetchRecipeDetails(id)
-    //   .then((response) => {
-    //     setData(response);
-    //     setIsFavorite(response.isFavorite); // Assuming the API response includes an isFavorite field
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error fetching data:', error);
-    //   });
-    
+    const fetchData = async () => {
+      try {
+        const recipesDetails = await fetchFavoriteRecipesDetails(userId);
+        setData(recipesDetails);
+        setFilteredData(recipesDetails);
+      } catch (error) {
+        console.error('Error fetching favorite recipes details:', error);
+      }
+    };
+    fetchData();
   }, [userId]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
     if (query.length >= 3) {
       const filteredRecipes = data.filter((recipe) =>
-        recipe.title.toLowerCase().startsWith(query.toLowerCase())
+        recipe.title.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredData(filteredRecipes);
     } else {
@@ -49,42 +36,7 @@ const FavoritesPage = () => {
     }
   };
 
-  const handleFilter = (id, filter) => {
-    switch (filter) {
-      case 'category':
-        fetchFavoriteRecipesByCategory(id, userId)
-          .then((response) => {
-            setFilteredData(response);
-          })
-          .catch((error) => {
-            console.error('Error fetching data:', error);
-          });
-        break;
-      case 'ingredient':
-        fetchFavoriteRecipesByIngredients(id, userId)
-          .then((response) => {
-            const filteredRecipes = response.filter((recipe) =>
-              data.some((item) => item.id === recipe.id)
-            );
-            setFilteredData(filteredRecipes);
-          })
-          .catch((error) => {
-            console.error('Error fetching data:', error);
-          });
-        break;
-      default:
-        fetchFavoriteRecipesByUser(userId)
-          .then((response) => {
-            setData(response);
-            setFilteredData(response);
-          })
-          .catch((error) => {
-            console.error('Error fetching data:', error);
-          });
-        break;
-    }
-  };
-
+ 
 
   return (
     <Wrapper>
@@ -100,9 +52,6 @@ const FavoritesPage = () => {
       >
         <div style={{ display: 'flex' }}>
           <SearchBar onSearch={handleSearch} />
-          <div style={{ marginLeft: '10px' }}>
-            <FilterButton onFilterClick={handleFilter} />
-          </div>
         </div>
       </div>
       <div style={{ width: '100%', maxWidth: '600px' }}>

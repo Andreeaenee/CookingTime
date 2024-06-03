@@ -16,7 +16,7 @@ return function ($app) {
         $app->post('', '\App\Services\RecipeHandler:addRecipe');
         $app->get('', '\App\Services\RecipeHandler:getFilteredRecipes'); 
         $app->put('/{id}', '\App\Services\RecipeHandler:updateRecipe'); 
-        //$app->delete('/{id}', '\App\Services\RecipeHandler:deleteRecipe');
+        $app->delete('/{id}', '\App\Services\RecipeHandler:deleteRecipe');
     });
 
 

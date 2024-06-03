@@ -23,21 +23,30 @@ final class FavoritesHandler
     public function getFavorite($request, $response, $args)
     {
         try {
-            // Get the SQL query for retrieving favorite recipes
-            $query = Favorites::getFavoritesQuery(); // Assuming you have a method to get the query for retrieving favorite recipes
-    
-            // Query database to retrieve favorite recipes
+            // Get the user ID from the request or from session, assuming it's available in $args
+            $userId = 2; // Update this with how you're retrieving the user ID
+            
+            // Get the SQL query for retrieving favorite recipes for a specific user
+            $query = Favorites::getFavoriteRecipeIdsQuery(); // Assuming you have a method to get the query for retrieving favorite recipes
+            
+            // Query database to retrieve favorite recipes for the specific user
             $statement = $this->pdo->prepare($query);
+            $statement->bindParam(':userId', $userId);
             $statement->execute();
             $favoriteRecipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
-    
+            
             // Return the favorite recipes as JSON
+            $responseJson = $response->withJson($favoriteRecipes);
+
+            $responseBody = $responseJson->getBody()->getContents();
+            echo $responseBody; // Print the JSON response
             return $response->withJson($favoriteRecipes);
         } catch (\PDOException $e) {
             // Handle database errors
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+    
 
     public function addFavorite($request, $response)
     {
