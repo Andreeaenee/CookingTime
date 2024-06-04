@@ -275,3 +275,19 @@ export async function fetchFavoriteRecipesDetails(userId) {
   }
 }
 
+export async function updateRecipeData(recipe) {
+  try {
+    console.log('Sending recipe data to server:', recipe); // Add this line
+    const response = await axiosFetch({
+      method: 'PUT',
+      url: `http://localhost:8080/recipes/${recipe.id}`,
+      data: recipe
+    });
+
+    console.log('Server response:', response.responseData); // Add this line
+    return response.responseData;
+  } catch (error) {
+    console.error('Error updating recipe:', error);
+    throw error;
+  }
+}
