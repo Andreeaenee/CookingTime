@@ -61,20 +61,24 @@ const AddRecipePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('steps', steps);
     formData.append('categoryId', parseInt(selectedCategory)); 
     formData.append('userId', 2); 
-    formData.append('image_id', "1");
-
+  
+    // Append the image file
+    if (image) {
+      formData.append('image', image);  // Key should match backend expectation
+    }
+  
     ingredients.forEach((ingredient, index) => {
       formData.append(`ingredients[${index}][id]`, ingredient.id); // Add ingredient ID
       formData.append(`ingredients[${index}][quantity]`, ingredient.quantity);
     });
-
+  
     try {
       const response = await axiosFetch({
         method: 'POST',
@@ -84,12 +88,13 @@ const AddRecipePage = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-
+  
       console.log('Recipe added successfully:', response.data.message);
     } catch (error) {
       console.error('Error:', error);
     }
   };
+  
  
   return (
     <Container maxWidth="sm">
