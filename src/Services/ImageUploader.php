@@ -17,7 +17,7 @@ final class ImageUploadHandler
             $imageId = uniqid(); // Generate unique ID for the image
             $uploadPath = './uploads'; // Set upload folder path
             $uploadedFileName = $uploadedFile->getClientFilename();
-            $uploadedFile->moveTo("$uploadPath/$imageId-$uploadedFileName");
+            $uploadedFile->moveTo("$uploadPath/$imageId.jpg");
 
             // Return image ID
             return $response->withJson(['imageId' => $imageId]);

@@ -20,8 +20,6 @@ import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import FoodPhoto from '../assets/photos/Photo.jpeg';
-
 const RecipeDetails = () => {
   const [data, setData] = useState({});
   const [isFavorite, setIsFavorite] = useState(false);
@@ -33,8 +31,10 @@ const RecipeDetails = () => {
   useEffect(() => {
     fetchRecipeDetails(id)
       .then((response) => {
+        console.log('Recipe details fetched:', response);
         setData(response);
         setIsFavorite(response.isFavorite); // Assuming the API response includes an isFavorite field
+
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -88,6 +88,10 @@ const RecipeDetails = () => {
     handleMenuClose();
   };
 
+  const imageUrl = data.image_id ? `/src/uploads/${data.image_id}.jpeg` : 'default-image-url.jpg';
+
+  
+  console.log('imageUrl:', imageUrl);
   return (
     <Wrapper>
       <Container
@@ -110,7 +114,7 @@ const RecipeDetails = () => {
               gutterBottom
               sx={{ fontWeight: 'bold', color: '#333' }}
             >
-              {data.title || 'Pasta with tomato'}
+              {data.title || 'Recipe Title'}
             </Typography>
             <Box>
               <IconButton onClick={handleFavoriteToggle}>
@@ -136,17 +140,17 @@ const RecipeDetails = () => {
                 paragraph
                 sx={{ color: '#555', lineHeight: '1.6' }}
               >
-                {data.description || 'A light and refreshing pasta dish featuring fresh tomatoes, perfect for those hot summer days.'}
+                {data.description || 'Recipe description goes here.'}
               </Typography>
               <Box
                 component="img"
-                src={FoodPhoto}
-                alt="Pasta with tomato"
+                src={imageUrl}
+                alt={data.title || 'Recipe Image'}
                 sx={{
-                  width: '50%',
+                  width: '100%',
                   borderRadius: '8px',
                   marginBottom: '20px',
-                  height: '450px',
+                  height: 'auto',
                 }}
               />
             </Grid>
@@ -233,16 +237,16 @@ const RecipeDetails = () => {
               sx={{ color: '#555', lineHeight: '1.6' }}
             >
               <ol>
-                {data.steps && data.steps.split('\n').map
-                ((step, index) => <li key={index}>{step}</li>)}
-                </ol>
-              </Typography>
-            </Box>
+                {data.steps && data.steps.split('\n').map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ol>
+            </Typography>
           </Box>
-        </Container>
-      </Wrapper>
-    );
-  };
-  
-  export default RecipeDetails;
-  
+        </Box>
+      </Container>
+    </Wrapper>
+  );
+};
+
+export default RecipeDetails;

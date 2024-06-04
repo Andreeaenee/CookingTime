@@ -267,24 +267,24 @@ public function deleteRecipe($request, $response, $args)
 public function addRecipe($request, $response, $args)
 {
     try {
-       // $uploadedFiles = $request->getUploadedFiles();
+        $uploadedFiles = $request->getUploadedFiles();
         $parsedBody = $request->getParsedBody();
 
         // Check if image file is uploaded
-       // if (!isset($uploadedFiles['imageId'])) {
-       //     throw new \InvalidArgumentException("Image file is required");
-       // }
+        if (!isset($uploadedFiles['image'])) {  // Key should match frontend
+            throw new \InvalidArgumentException("Image file is required");
+        }
 
-       // $imageFile = $uploadedFiles['imageId'];
-       // if ($imageFile->getError() !== UPLOAD_ERR_OK) {
-       //     throw new \RuntimeException("Failed to upload image");
-       // }
+        $imageFile = $uploadedFiles['image'];
+        if ($imageFile->getError() !== UPLOAD_ERR_OK) {
+            throw new \RuntimeException("Failed to upload image");
+        }
 
         // Generate unique ID for the image
-       // $imageId = uniqid();
-      //  $uploadPath = './uploads';
-       // $imageFileName = $imageFile->getClientFilename();
-       // $imageFile->moveTo("$uploadPath/$imageId-$imageFileName");
+        $imageId = uniqid();
+        $uploadPath = './uploads';
+        $imageFileName = $imageFile->getClientFilename();
+        $imageFile->moveTo("$uploadPath/$imageId.jpeg");
 
         // Check if all required fields are present
         $requiredFields = ['description', 'title', 'steps', 'categoryId', 'userId', 'ingredients'];
@@ -298,7 +298,7 @@ public function addRecipe($request, $response, $args)
         $currentDate = date('Y-m-d');
         $sqlInsertRecipe = Recipe::addRecipeQuery();
         $statement = $this->pdo->prepare($sqlInsertRecipe);
-        $statement->bindParam(':imageId', $parsedBody['imageId']);
+        $statement->bindParam(':imageId', $imageId);  // Binding the image ID
         $statement->bindParam(':description', $parsedBody['description']);
         $statement->bindParam(':title', $parsedBody['title']);
         $statement->bindParam(':steps', $parsedBody['steps']);
@@ -333,6 +333,7 @@ public function addRecipe($request, $response, $args)
         return $response->withStatus(500)->write("Database error: " . $e->getMessage());
     }
 }
+
 
 public function updateRecipe($request, $response, $args)
 {
