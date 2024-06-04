@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Wrapper from '../components/Wrapper';
 import { fetchRecipeDetails, deleteRecipe, addToFavorites, removeFromFavorites } from '../api/getRecipes';
 import { getShoppingLists, updateShoppingList } from '../api/getShoppingLists';
@@ -19,6 +19,7 @@ import {
 import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import FoodPhoto from '../assets/photos/Photo.jpeg';
 
 const RecipeDetails = () => {
@@ -118,6 +119,9 @@ const RecipeDetails = () => {
                 ) : (
                   <FavoriteBorder sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
                 )}
+              </IconButton>
+              <IconButton component={Link} to={`/edit-recipe/${id}`}>
+                <EditIcon sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
               </IconButton>
               <IconButton onClick={handleDelete}>
                 <DeleteIcon sx={{ color: '#f44336', fontSize: '2.5rem' }} />
@@ -229,14 +233,16 @@ const RecipeDetails = () => {
               sx={{ color: '#555', lineHeight: '1.6' }}
             >
               <ol>
-                {data.steps && data.steps.split('\n').map((step, index) => <li key={index}>{step}</li>)}
-              </ol>
-            </Typography>
+                {data.steps && data.steps.split('\n').map
+                ((step, index) => <li key={index}>{step}</li>)}
+                </ol>
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      </Container>
-    </Wrapper>
-  );
-};
-
-export default RecipeDetails;
+        </Container>
+      </Wrapper>
+    );
+  };
+  
+  export default RecipeDetails;
+  

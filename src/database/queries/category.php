@@ -17,5 +17,12 @@ final class Category
     {
         return "SELECT * FROM category";
     }
+    public function getCategoryName($categoryId) {
+        $query = "SELECT name FROM category WHERE id = :categoryId";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(array(':categoryId' => $categoryId));
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['name'] : 'Unknown Category';
+    }
 }
 
