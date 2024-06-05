@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from 'axios';
 
 export default function axiosFetch(options) {
   if (!options.headers) {
@@ -18,7 +18,6 @@ export default function axiosFetch(options) {
     })
     .catch((error) => {
       console.error('Error:', error)
-
       throw error
     })
 }

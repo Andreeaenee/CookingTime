@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Wrapper from '../components/Wrapper';
 import {
   fetchRecipesByCategory,
   fetchRecipesByIngredients,
   fetchRecipesData,
-  fetchCategories,
+  addToFavorites,
 } from '../api/getRecipes';
 import RecipeCard from '../components/RecipeCard';
 import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
-import { Grid, Container, Typography } from '@mui/material';
+import { Grid } from '@mui/material';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 
 const RecipesPage = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { isAuthenticated, notify } = useContext(AuthContext); // Use context for authentication
 
   useEffect(() => {
     fetchRecipesData()
@@ -28,7 +29,6 @@ const RecipesPage = () => {
   }, []);
 
   const handleSearch = (query) => {
-    setSearchQuery(query);
     if (query.length >= 3) {
       const filteredRecipes = data.filter((recipe) =>
         recipe.title.toLowerCase().startsWith(query.toLowerCase())
@@ -72,27 +72,46 @@ const RecipesPage = () => {
     }
   };
 
+  const handleAddToFavorites = (recipeId) => {
+    if (!isAuthenticated) {
+      notify();
+      return;
+    }
+    addToFavorites(recipeId)
+      .then(() => {
+        // Handle successful addition to favorites
+      })
+      .catch((error) => {
+        console.error('Error adding to favorites:', error);
+      });
+  };
+
   return (
     <Wrapper>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            marginBottom: '20px',
-          }}
-        >
-          <SearchBar onSearch={handleSearch} />
-          <div style={{ marginLeft: '10px' }}>
-            <FilterButton onFilterClick={handleFilter} />
-          </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          marginBottom: '20px',
+        }}
+      >
+        <SearchBar onSearch={handleSearch} />
+        <div style={{ marginLeft: '10px' }}>
+          <FilterButton onFilterClick={handleFilter} />
         </div>
-        <Grid container spacing={4}>
-          {filteredData.map((recipe) => (
-            <Grid item xs={12} sm={6} md={4} key={recipe.id}>
-              <RecipeCard recipe={recipe} />
-            </Grid>
-          ))}
-        </Grid>
+      </div>
+      <Grid container spacing={4}>
+        {filteredData.map((recipe) => (
+          <Grid item xs={12} sm={6} md={4} key={recipe.id}>
+            <RecipeCard
+              recipe={recipe}
+              onAddToFavorites={() => handleAddToFavorites(recipe.id)}
+              onEdit={() => console.log(`Edit recipe ${recipe.id}`)} // Placeholder for edit functionality
+              onDelete={() => console.log(`Delete recipe ${recipe.id}`)} // Placeholder for delete functionality
+            />
+          </Grid>
+        ))}
+      </Grid>
     </Wrapper>
   );
 };

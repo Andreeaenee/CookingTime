@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 export const handleSignUp = async (firstName, lastName, email, password, setOpenSuccess, setOpenError, setErrorMessage, navigate) => {
   try {
@@ -10,7 +10,7 @@ export const handleSignUp = async (firstName, lastName, email, password, setOpen
     });
     if (response.data.message === "User added successfully") {
       setOpenSuccess(true);
-      setTimeout(() => navigate("/login"), 2000); // Redirect după 2 secunde
+      setTimeout(() => navigate("/login"), 2000); // Redirect after 2 seconds
     } else {
       setErrorMessage(response.data.message);
       setOpenError(true);
@@ -20,6 +20,7 @@ export const handleSignUp = async (firstName, lastName, email, password, setOpen
     setOpenError(true);
   }
 };
+
 export const handleLogin = async (email, password, setOpenError, setErrorMessage, navigate) => {
   try {
     const response = await axios.post("http://localhost:8080/login", {
@@ -37,5 +38,14 @@ export const handleLogin = async (email, password, setOpenError, setErrorMessage
     console.error("Login error:", error); // Log error
     setErrorMessage(error.response && error.response.data ? error.response.data.message : error.message);
     setOpenError(true);
+  }
+};
+
+export const logout = async () => {
+  try {
+    await axios.post('http://localhost:8080/logout');
+    localStorage.removeItem('token'); // If you are storing the token in localStorage
+  } catch (error) {
+    console.error("Logout failed", error);
   }
 };

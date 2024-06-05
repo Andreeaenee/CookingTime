@@ -22,15 +22,15 @@ const RecipeCard = ({ recipe }) => {
   const categoryTitle = category.find((cat) => cat.category_id === recipe.category_id)?.title;
 
   return (
-    <Link to={`/recipes/${recipe.id}`} style={{ textDecoration: 'none' }}>
-      <Card sx={{ 
-        marginBottom: 2, 
-        ':hover': { 
-          boxShadow: 6, 
-          transform: 'scale(1.02)' 
-        },
-        transition: 'transform 0.2s, box-shadow 0.2s'
-      }}>
+    <Card sx={{
+      marginBottom: 2,
+      ':hover': {
+        boxShadow: 6,
+        transform: 'scale(1.02)'
+      },
+      transition: 'transform 0.2s, box-shadow 0.2s'
+    }}>
+      <Link to={`/recipes/${recipe.id}`} style={{ textDecoration: 'none' }}>
         {recipe.image && (
           <CardMedia
             component="img"
@@ -63,8 +63,8 @@ const RecipeCard = ({ recipe }) => {
             </Typography>
           )}
         </CardContent>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 };
 

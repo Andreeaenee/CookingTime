@@ -46,5 +46,10 @@ return function ($app) {
    
     //login post
     $app->post('/login', '\App\Services\UserHandler:login');
-    return $app;
+    $app->post('/logout', '\App\Services\UserHandler:logout');
+
+
+
+
+    return $app; 
 };
