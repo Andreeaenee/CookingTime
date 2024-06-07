@@ -4,13 +4,14 @@ import {
   fetchRecipesByCategory,
   fetchRecipesByIngredients,
   fetchRecipesData,
-  addToFavorites,
+  fetchCategories
 } from '../api/getRecipes';
 import RecipeCard from '../components/RecipeCard';
 import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
-import { Grid } from '@mui/material';
 import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import { Grid, Container, Typography } from '@mui/material';
+
 
 const RecipesPage = () => {
   const [data, setData] = useState([]);
@@ -77,13 +78,7 @@ const RecipesPage = () => {
       notify();
       return;
     }
-    addToFavorites(recipeId)
-      .then(() => {
-        // Handle successful addition to favorites
-      })
-      .catch((error) => {
-        console.error('Error adding to favorites:', error);
-      });
+  
   };
 
   return (
@@ -101,17 +96,12 @@ const RecipesPage = () => {
         </div>
       </div>
       <Grid container spacing={4}>
-        {filteredData.map((recipe) => (
-          <Grid item xs={12} sm={6} md={4} key={recipe.id}>
-            <RecipeCard
-              recipe={recipe}
-              onAddToFavorites={() => handleAddToFavorites(recipe.id)}
-              onEdit={() => console.log(`Edit recipe ${recipe.id}`)} // Placeholder for edit functionality
-              onDelete={() => console.log(`Delete recipe ${recipe.id}`)} // Placeholder for delete functionality
-            />
-          </Grid>
-        ))}
-      </Grid>
+          {filteredData.map((recipe) => (
+            <Grid item xs={12} sm={6} md={4} key={recipe.id}>
+              <RecipeCard recipe={recipe} />
+              </Grid>
+          ))}
+        </Grid>
     </Wrapper>
   );
 };

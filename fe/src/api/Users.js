@@ -41,11 +41,4 @@ export const handleLogin = async (email, password, setOpenError, setErrorMessage
   }
 };
 
-export const logout = async () => {
-  try {
-    await axios.post('http://localhost:8080/logout');
-    localStorage.removeItem('token'); // If you are storing the token in localStorage
-  } catch (error) {
-    console.error("Logout failed", error);
-  }
-};
+

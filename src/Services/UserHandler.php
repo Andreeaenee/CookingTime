@@ -157,10 +157,10 @@ final class UserHandler
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
-    public function logout($request, $response) {
-        session_start();
-        session_destroy(); // Invalidate the session
-        return $response->withStatus(200)->withJson(['message' => 'Logged out successfully']);
-    }
+    // public function logout($request, $response) {
+    //     session_start();
+    //     session_destroy(); // Invalidate the session
+    //     return $response->withStatus(200)->withJson(['message' => 'Logged out successfully']);
+    // }
 }
     
