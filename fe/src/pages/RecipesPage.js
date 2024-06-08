@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Wrapper from '../components/Wrapper';
 import {
   fetchRecipesByCategory,
   fetchRecipesByIngredients,
   fetchRecipesData,
-  fetchCategories,
+  fetchCategories
 } from '../api/getRecipes';
 import RecipeCard from '../components/RecipeCard';
 import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 import { Grid, Container, Typography } from '@mui/material';
+
 
 const RecipesPage = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { isAuthenticated, notify } = useContext(AuthContext); // Use context for authentication
 
   useEffect(() => {
     fetchRecipesData()
@@ -28,7 +30,6 @@ const RecipesPage = () => {
   }, []);
 
   const handleSearch = (query) => {
-    setSearchQuery(query);
     if (query.length >= 3) {
       const filteredRecipes = data.filter((recipe) =>
         recipe.title.toLowerCase().startsWith(query.toLowerCase())
@@ -72,25 +73,33 @@ const RecipesPage = () => {
     }
   };
 
+  const handleAddToFavorites = (recipeId) => {
+    if (!isAuthenticated) {
+      notify();
+      return;
+    }
+  
+  };
+
   return (
     <Wrapper>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            marginBottom: '20px',
-          }}
-        >
-          <SearchBar onSearch={handleSearch} />
-          <div style={{ marginLeft: '10px' }}>
-            <FilterButton onFilterClick={handleFilter} />
-          </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          marginBottom: '20px',
+        }}
+      >
+        <SearchBar onSearch={handleSearch} />
+        <div style={{ marginLeft: '10px' }}>
+          <FilterButton onFilterClick={handleFilter} />
         </div>
-        <Grid container spacing={4}>
+      </div>
+      <Grid container spacing={4}>
           {filteredData.map((recipe) => (
             <Grid item xs={12} sm={6} md={4} key={recipe.id}>
               <RecipeCard recipe={recipe} />
-            </Grid>
+              </Grid>
           ))}
         </Grid>
     </Wrapper>

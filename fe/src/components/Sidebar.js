@@ -1,22 +1,26 @@
-import React from 'react';
+// src/components/Sidebar.js
+import React, { useContext } from 'react';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const drawerWidth = 240;
 
-const buttons = [
-  { text: 'Recipes', link: '/recipes' },
-  { text: 'My Recipes', link: '/my-recipes' },
-  { text: 'Favorites', link: '/favorites' },
-  { text: 'Shopping List', link: '/shopping-list' },
-  { text: 'Login', link: '/login' },
-];
-
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, isAuthenticated, notify } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    if (isAuthenticated) {
+      logout(navigate);
+    } else {
+      notify();
+    }
+  };
 
   return (
     <Drawer
@@ -25,40 +29,122 @@ const Sidebar = () => {
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: drawerWidth,
-          backgroundColor: '#f5e6f7', // pale purple background
-          color: '#333', // text color
-          boxShadow: '2px 0 5px rgba(0,0,0,0.1)', // subtle shadow
+          backgroundColor: '#f5e6f7',
+          color: '#333',
+          boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
         },
       }}
       variant="permanent"
     >
-      <div sx={{ height: 64 }} /> {/* Height of your toolbar */}
-      <List sx={{ marginTop: 2 }}> {/* Add margin-top to the list */}
-        {buttons.map((button) => (
-          <ListItem
-            key={button.text}
-            button
-            component={Link}
-            to={button.link}
+      <div sx={{ height: 64 }} />
+      <List sx={{ marginTop: 2 }}>
+        <ListItem
+          button
+          component={Link}
+          to="/recipes"
+          sx={{
+            backgroundColor: location.pathname === '/recipes' ? '#d3c3e7' : 'inherit',
+            '&:hover': { backgroundColor: '#d3c3e7' },
+            marginBottom: 1,
+            borderRadius: 1,
+          }}
+        >
+          <ListItemText
+            primary="Recipes"
             sx={{
-              backgroundColor: location.pathname.includes(button.link) ? '#d3c3e7' : 'inherit', // active button color
-              '&:hover': {
-                backgroundColor: '#d3c3e7', // darker pale purple on hover
-              },
-              marginBottom: 1, // Add margin-bottom to the list items
-              borderRadius: 1, // Add slight border radius to list items
+              fontFamily: 'Arial, sans-serif',
+              color: location.pathname === '/recipes' ? '#000' : '#333',
+              fontWeight: location.pathname === '/recipes' ? 'bold' : 'normal',
             }}
-          >
-            <ListItemText
-              primary={button.text}
+          />
+        </ListItem>
+
+        {isAuthenticated && (
+          <>
+            <ListItem
+              button
+              component={Link}
+              to="/my-recipes"
               sx={{
-                fontFamily: 'Arial, sans-serif', // Set font
-                color: location.pathname.includes(button.link) ? '#000' : '#333', // Active and default text color
-                fontWeight: location.pathname.includes(button.link) ? 'bold' : 'normal', // Bold text for active item
+                backgroundColor: location.pathname === '/my-recipes' ? '#d3c3e7' : 'inherit',
+                '&:hover': { backgroundColor: '#d3c3e7' },
+                marginBottom: 1,
+                borderRadius: 1,
               }}
-            />
-          </ListItem>
-        ))}
+            >
+              <ListItemText
+                primary="My Recipes"
+                sx={{
+                  fontFamily: 'Arial, sans-serif',
+                  color: location.pathname === '/my-recipes' ? '#000' : '#333',
+                  fontWeight: location.pathname === '/my-recipes' ? 'bold' : 'normal',
+                }}
+              />
+            </ListItem>
+
+            <ListItem
+              button
+              component={Link}
+              to="/shopping-list"
+              sx={{
+                backgroundColor: location.pathname === '/shopping-list' ? '#d3c3e7' : 'inherit',
+                '&:hover': { backgroundColor: '#d3c3e7' },
+                marginBottom: 1,
+                borderRadius: 1,
+              }}
+            >
+              <ListItemText
+                primary="Shopping List"
+                sx={{
+                  fontFamily: 'Arial, sans-serif',
+                  color: location.pathname === '/shopping-list' ? '#000' : '#333',
+                  fontWeight: location.pathname === '/shopping-list' ? 'bold' : 'normal',
+                }}
+              />
+            </ListItem>
+
+            <ListItem
+              button
+              component={Link}
+              to="/favorites"
+              sx={{
+                backgroundColor: location.pathname === '/favorites' ? '#d3c3e7' : 'inherit',
+                '&:hover': { backgroundColor: '#d3c3e7' },
+                marginBottom: 1,
+                borderRadius: 1,
+              }}
+            >
+              <ListItemText
+                primary="Favorites"
+                sx={{
+                  fontFamily: 'Arial, sans-serif',
+                  color: location.pathname === '/favorites' ? '#000' : '#333',
+                  fontWeight: location.pathname === '/favorites' ? 'bold' : 'normal',
+                }}
+              />
+            </ListItem>
+          </>
+        )}
+
+        <ListItem
+          button
+          onClick={isAuthenticated ? handleLogout : () => navigate('/login')}
+          sx={{
+            backgroundColor: isAuthenticated ? 'inherit' : 'inherit',
+            '&:hover': { backgroundColor: '#d3c3e7' },
+            marginBottom: 1,
+            borderRadius: 1,
+          }}
+        >
+          <ListItemText
+            primary={isAuthenticated ? 'Logout' : 'Login'}
+            sx={{
+              fontFamily: 'Arial, sans-serif',
+              color: '#333',
+              fontWeight: 'normal',
+            }}
+          />
+        </ListItem>
       </List>
     </Drawer>
   );

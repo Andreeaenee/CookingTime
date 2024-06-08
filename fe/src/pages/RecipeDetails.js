@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Wrapper from '../components/Wrapper';
 import { fetchRecipeDetails, deleteRecipe, addToFavorites, removeFromFavorites } from '../api/getRecipes';
 import { getShoppingLists, updateShoppingList } from '../api/getShoppingLists';
+import { AuthContext } from '../context/AuthContext';
 import {
   Box,
   Grid,
@@ -20,6 +21,7 @@ import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+
 const RecipeDetails = () => {
   const [data, setData] = useState({});
   const [isFavorite, setIsFavorite] = useState(false);
@@ -27,14 +29,13 @@ const RecipeDetails = () => {
   const [shoppingList, setShoppingList] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated, notify } = useContext(AuthContext);
 
   useEffect(() => {
     fetchRecipeDetails(id)
       .then((response) => {
-        console.log('Recipe details fetched:', response);
         setData(response);
         setIsFavorite(response.isFavorite); // Assuming the API response includes an isFavorite field
-
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -49,6 +50,10 @@ const RecipeDetails = () => {
   }, [id]);
 
   const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      notify();
+      return;
+    }
     setIsFavorite(!isFavorite);
     try {
       if (!isFavorite) {
@@ -64,6 +69,10 @@ const RecipeDetails = () => {
   };
 
   const handleDelete = async () => {
+    if (!isAuthenticated) {
+      notify();
+      return;
+    }
     try {
       await deleteRecipe(id);
       navigate('/recipes');
@@ -81,6 +90,10 @@ const RecipeDetails = () => {
   };
 
   const handleAddToShoppingList = (listId) => {
+    if (!isAuthenticated) {
+      notify();
+      return;
+    }
     const sendData = {
       ingredients: JSON.stringify(data.ingredients),
     };
@@ -90,8 +103,6 @@ const RecipeDetails = () => {
 
   const imageUrl = data.image_id ? `/src/uploads/${data.image_id}.jpeg` : 'default-image-url.jpg';
 
-  
-  console.log('imageUrl:', imageUrl);
   return (
     <Wrapper>
       <Container
@@ -103,11 +114,7 @@ const RecipeDetails = () => {
         }}
       >
         <Box my={4} sx={{ marginRight: '100px', marginLeft: '50px' }}>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
             <Typography
               variant="h3"
               component="h1"
@@ -116,21 +123,23 @@ const RecipeDetails = () => {
             >
               {data.title || 'Recipe Title'}
             </Typography>
-            <Box>
-              <IconButton onClick={handleFavoriteToggle}>
-                {isFavorite ? (
-                  <Favorite sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
-                ) : (
-                  <FavoriteBorder sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
-                )}
-              </IconButton>
-              <IconButton component={Link} to={`/edit-recipe/${id}`}>
-                <EditIcon sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
-              </IconButton>
-              <IconButton onClick={handleDelete}>
-                <DeleteIcon sx={{ color: '#f44336', fontSize: '2.5rem' }} />
-              </IconButton>
-            </Box>
+            {isAuthenticated && (
+              <Box>
+                <IconButton onClick={handleFavoriteToggle}>
+                  {isFavorite ? (
+                    <Favorite sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
+                  ) : (
+                    <FavoriteBorder sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
+                  )}
+                </IconButton>
+                <IconButton component={Link} to={`/edit-recipe/${id}`}>
+                  <EditIcon sx={{ color: '#f880b8', fontSize: '2.5rem' }} />
+                </IconButton>
+                <IconButton onClick={handleDelete}>
+                  <DeleteIcon sx={{ color: '#f44336', fontSize: '2.5rem' }} />
+                </IconButton>
+              </Box>
+            )}
           </Box>
           <Grid container spacing={4}>
             <Grid item xs={12} md={8}>
@@ -190,34 +199,38 @@ const RecipeDetails = () => {
                     </ListItem>
                   ))}
                 </List>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleMenuOpen}
-                  sx={{
-                    marginTop: '16px',
-                    backgroundColor: '#8361F7',
-                    '&:hover': { backgroundColor: '#303f9f' },
-                    fontWeight: 'bold',
-                    padding: '10px 20px',
-                  }}
-                >
-                  Add to shopping list
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                >
-                  {shoppingList.map((list) => (
-                    <MenuItem
-                      key={list.id}
-                      onClick={() => handleAddToShoppingList(list.id)}
+                {isAuthenticated && (
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleMenuOpen}
+                      sx={{
+                        marginTop: '16px',
+                        backgroundColor: '#8361F7',
+                        '&:hover': { backgroundColor: '#303f9f' },
+                        fontWeight: 'bold',
+                        padding: '10px 20px',
+                      }}
                     >
-                      {list.name}
-                    </MenuItem>
-                  ))}
-                </Menu>
+                      Add to shopping list
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                    >
+                      {shoppingList.map((list) => (
+                        <MenuItem
+                          key={list.id}
+                          onClick={() => handleAddToShoppingList(list.id)}
+                        >
+                          {list.name}
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </div>
+                )}
               </Box>
             </Grid>
           </Grid>
@@ -237,7 +250,7 @@ const RecipeDetails = () => {
               sx={{ color: '#555', lineHeight: '1.6' }}
             >
               <ol>
-                {data.steps && data.steps.split('\n').map((step, index) => (
+                {data.steps && data.steps.split(/(?<!\d\.\d\.)\s(?=\d+\.\s)/).map((step, index) => (
                   <li key={index}>{step}</li>
                 ))}
               </ol>
