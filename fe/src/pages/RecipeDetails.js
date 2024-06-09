@@ -30,8 +30,6 @@ const RecipeDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, notify } = useContext(AuthContext);
-  const { userId } = useContext(AuthContext); 
-  console.log('userId:', userId);
 
   useEffect(() => {
     fetchRecipeDetails(id)
@@ -59,7 +57,7 @@ const RecipeDetails = () => {
     setIsFavorite(!isFavorite);
     try {
       if (!isFavorite) {
-        const response = await addToFavorites(id,userId);
+        const response = await addToFavorites(id);
         console.log('Recipe added to favorites:', response);
       } else {
         const response = await removeFromFavorites(id);

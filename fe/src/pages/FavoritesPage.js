@@ -1,21 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Wrapper from '../components/Wrapper';
 import RecipeCard from '../components/RecipeCard';
+import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
-import { fetchFavoriteRecipesDetails } from '../api/getRecipes';
+import { fetchFavoriteRecipesDetails, fetchFavoriteRecipesByCategory, fetchFavoriteRecipesByIngredients } from '../api/getRecipes';
 
 const FavoritesPage = () => {
-  const { userId } = useContext(AuthContext); // Access userId from AuthContext
-
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const userId = 2; // Replace with the actual user ID
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!userId) return; // Guard clause to prevent fetching if userId is not available
         const recipesDetails = await fetchFavoriteRecipesDetails(userId);
         setData(recipesDetails);
         setFilteredData(recipesDetails);
@@ -38,6 +36,8 @@ const FavoritesPage = () => {
     }
   };
 
+ 
+
   return (
     <Wrapper>
       <div
@@ -59,8 +59,6 @@ const FavoritesPage = () => {
           filteredData.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
-        ) : data.length === 0 ? (
-          <p>Loading...</p>
         ) : (
           <p>No recipes found.</p>
         )}

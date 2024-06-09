@@ -149,7 +149,7 @@ final class UserHandler
             $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-                return $response->withJson(['status' => 'success', 'userId' => $user['id']]);
+                return $response->withJson(['status' => 'success']);
             } else {
                 return $response->withJson(['status' => 'error', 'message' => 'Invalid email or password'], 401);
             }
