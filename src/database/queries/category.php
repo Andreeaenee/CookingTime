@@ -24,5 +24,21 @@ final class Category
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['name'] : 'Unknown Category';
     }
-}
 
+    public static function getRecipesByCategoryAndUserIdQuery()
+    {
+        return "
+            SELECT 
+                r.id, r.title, r.description, r.steps, r.image_id, 
+                i.name AS ingredient_name, rhi.quantity
+            FROM 
+                recipes r
+            JOIN 
+                recipes_has_ingredients rhi ON r.id = rhi.id_recipe
+            JOIN 
+                ingredients i ON rhi.id_ingredient = i.id
+            WHERE 
+                r.category_id = :categoryId AND r.user_id = :userId
+        ";
+    }
+}

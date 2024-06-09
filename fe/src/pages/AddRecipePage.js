@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react'; // Step 1
 import { Link } from 'react-router-dom';
 import { Container, Typography, TextField, Button, Paper, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import axiosFetch from '../api/Axios';
 import { fetchRecipesCategory, fetchRecipesIngredients } from '../api/getRecipes';
+import { AuthContext } from '../context/AuthContext'; // Step 2
 
 const AddRecipePage = () => {
   const [title, setTitle] = useState('');
@@ -13,6 +14,8 @@ const AddRecipePage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [ingredientsList, setIngredientsList] = useState([]);
+
+  const { userId } = useContext(AuthContext); // Step 3
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -67,7 +70,7 @@ const AddRecipePage = () => {
     formData.append('description', description);
     formData.append('steps', steps);
     formData.append('categoryId', parseInt(selectedCategory)); 
-    formData.append('userId', 2); 
+    formData.append('userId', userId); // Step 4
   
     // Append the image file
     if (image) {
@@ -210,7 +213,7 @@ const AddRecipePage = () => {
         <Box mt={2} textAlign="center">
           <Button component={Link} to="/my-recipes" variant="outlined" color="primary">
             Go to My Recipes
-          </Button>
+            </Button>
         </Box>
       </Paper>
     </Container>
@@ -218,3 +221,4 @@ const AddRecipePage = () => {
 };
 
 export default AddRecipePage;
+    

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Wrapper from '../components/Wrapper';
 import { Link } from 'react-router-dom'; 
 import {
@@ -9,24 +9,37 @@ import {
 import RecipeCard from '../components/RecipeCard';
 import FilterButton from '../components/FilterButton';
 import SearchBar from '../components/SearchBar';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 
 const MyRecipesPage = () => {
+  const { userId } = useContext(AuthContext); // Access userId from AuthContext
+
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const userId = 2;
+  // Print the user ID to the console
+  console.log('Current user ID:', userId);
 
   useEffect(() => {
-    fetchRecipesByUser(userId)
-      .then((response) => {
-        setData(response);
-        setFilteredData(response);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
+    if (userId) {
+      fetchRecipesByUser(userId)
+        .then((response) => {
+          setData(response);
+          setFilteredData(response);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+          setError('Error fetching recipes.');
+          setLoading(false);
+        });
+    }
   }, [userId]);
+
+  console.log('Fetching recipes for user ID:', userId);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -41,26 +54,45 @@ const MyRecipesPage = () => {
   };
 
   const handleFilter = (id, filter) => {
+    setLoading(true);
     switch (filter) {
       case 'category':
         fetchRecipesByCategoryByUser(id, userId)
           .then((response) => {
-            setFilteredData(response);
+            if (response.message) {
+              setFilteredData([]); // No recipes found
+              setError(response.message);
+            } else {
+              setFilteredData(response);
+              setError(null);
+            }
+            setLoading(false);
           })
           .catch((error) => {
             console.error('Error fetching data:', error);
+            setError('Error fetching recipes.');
+            setLoading(false);
           });
         break;
       case 'ingredient':
         fetchRecipesByIngredientsByUser(id, userId)
           .then((response) => {
-            const filteredRecipes = data.filter(recipe => 
-              response.some(ingredient => recipe.ingredients.includes(ingredient))
+            const filteredRecipes = response.filter(recipe =>
+              data.some(dataRecipe => dataRecipe.id === recipe.id)
             );
-            setFilteredData(filteredRecipes);
+            if (filteredRecipes.length === 0) {
+              setFilteredData([]); // No recipes found
+              setError('No recipes found for the given ingredient.');
+            } else {
+              setFilteredData(filteredRecipes);
+              setError(null);
+            }
+            setLoading(false);
           })
           .catch((error) => {
             console.error('Error fetching data:', error);
+            setError('Error fetching recipes.');
+            setLoading(false);
           });
         break;
       default:
@@ -68,13 +100,17 @@ const MyRecipesPage = () => {
           .then((response) => {
             setData(response);
             setFilteredData(response);
+            setLoading(false);
           })
           .catch((error) => {
             console.error('Error fetching data:', error);
+            setError('Error fetching recipes.');
+            setLoading(false);
           });
         break;
     }
   };
+  
 
   return (
     <Wrapper>
@@ -111,11 +147,19 @@ const MyRecipesPage = () => {
           Add Recipe
         </Link>
       </div>
-      <div style={{ width: '100%', maxWidth: '600px' }}>
-        {filteredData.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))}
-      </div>
+      {loading && <div>Loading...</div>}
+      {error && <div>{error}</div>}
+      {!loading && !error && (
+        <div style={{ width: '100%', maxWidth: '600px' }}>
+          {filteredData.length === 0 ? (
+            <div>No recipes found for the given category and user ID.</div>
+          ) : (
+            filteredData.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))
+          )}
+        </div>
+      )}
     </Wrapper>
   );
 };

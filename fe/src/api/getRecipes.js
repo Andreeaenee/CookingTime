@@ -73,9 +73,11 @@ export async function fetchRecipesByUser(userId) {
       method: 'GET',
       url: 'http://localhost:8080/recipes?filter=user&id=' + userId,
     });
+    
     return response.responseData;
   } catch (error) {
     console.log('Error: ', error);
+    console.log('Response:', userId);
     throw error;
   }
 }
@@ -92,6 +94,7 @@ export async function fetchRecipesByCategoryByUser(category, userId) {
     throw error;
   }
 }
+
 
 export async function fetchRecipesByIngredientsByUser(ingredient, userId) {
   try {
@@ -174,14 +177,14 @@ export async function fetchFavoriteRecipesByIngredients(ingredient, userId) {
 }
 
 // Funcția pentru adăugarea unei rețete la favorite
-export const addToFavorites = async (recipeId) => {
+export const addToFavorites = async (recipeId, userId) => {
   try {
     const response = await axiosFetch({
       method: 'POST',
       url: `http://localhost:8080/favorites`,
       data: {
         recipe_id: recipeId,
-        user_id: 2, // Înlocuiește cu ID-ul real al utilizatorului
+        user_id: userId, // Înlocuiește cu ID-ul real al utilizatorului
       },
     });
     return response;
@@ -249,6 +252,7 @@ export async function fetchFavoriteRecipeIds(userId) {
       url: `http://localhost:8080/favorites?userId=${userId}`,
     });
     return response.responseData.map(favorite => favorite.recipe_id);
+    console.log('Favorite recipe IDs:', response);
   } catch (error) {
     console.log('Error: ', error);
     throw error;
