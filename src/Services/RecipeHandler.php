@@ -27,13 +27,23 @@ final class RecipeHandler
         $queryParams = $request->getQueryParams();
         $filter = $queryParams['filter'] ?? null;
         $filterId = $queryParams['id'] ?? null;
+        $userId = $queryParams['userId'] ?? null;
+
         
         switch ($filter) {
             case 'category':
-                return $this->getRecipesByCategoryId($request, $response, $filterId);
+                if ($userId) {
+                    return $this->getRecipesByCategoryAndUserId($request, $response, $filterId, $userId);
+                } else {
+                    return $this->getRecipesByCategoryId($request, $response, $filterId);
+                }
                 break;
             case 'ingredient':
-                return $this->getRecipesByIngredient($request, $response, $filterId);
+                if ($userId) {
+                    return $this->getRecipesByIngredientAndUserId($request, $response, $filterId, $userId);
+                } else {
+                    return $this->getRecipesByIngredient($request, $response, $filterId);
+                }
                 break;
             case 'user':
                 return $this->getRecipesByUserId($request, $response, $filterId);
@@ -467,4 +477,99 @@ private function updateRecipeIngredients($recipeId, $ingredients)
             return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
     }
+
+    public function getRecipesByCategoryAndUserId($request, $response, $categoryId, $userId)
+    {
+        try {
+            // Get the SQL query for retrieving recipes by category ID and user ID
+            $query = Category::getRecipesByCategoryAndUserIdQuery();
+            
+            // Prepare the query and execute it with the given category ID and user ID
+            $statement = $this->pdo->prepare($query);
+            $statement->execute(['categoryId' => $categoryId, 'userId' => $userId]);
+            $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Debugging: Print the executed query and parameters
+            error_log("Executed Query: " . $statement->queryString);
+            error_log("Parameters: " . json_encode(['categoryId' => $categoryId, 'userId' => $userId]));
+            error_log("Fetched Recipes: " . json_encode($recipes));
+            
+            // Check if any recipes are found
+            if (empty($recipes)) {
+                return $response->withJson(["message" => "No recipes found for the given category and user ID."]);
+            }
+    
+            // Group recipes by ID and combine their ingredients
+            $groupedRecipes = [];
+            foreach ($recipes as $recipe) {
+                $recipeId = $recipe['id'];
+                if (!isset($groupedRecipes[$recipeId])) {
+                    $groupedRecipes[$recipeId] = $recipe;
+                    $groupedRecipes[$recipeId]['ingredients'] = [];
+                }
+                if (!empty($recipe['ingredient_name'])) {
+                    $groupedRecipes[$recipeId]['ingredients'][] = [
+                        'name' => $recipe['ingredient_name'],
+                        'quantity' => $recipe['quantity']
+                    ];
+                }
+                // Unset unnecessary fields
+                unset($groupedRecipes[$recipeId]['ingredient_name']);
+                unset($groupedRecipes[$recipeId]['quantity']);
+            }
+    
+            // Return the recipes as JSON
+            return $response->withJson(array_values($groupedRecipes));
+        } catch (\PDOException $e) {
+            // Handle database errors
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+        }
+    }
+
+    public function getRecipesByIngredientAndUserId($request, $response, $ingredientId, $userId)
+{
+    try {
+        // Get the SQL query for retrieving recipes by ingredient ID and user ID
+        $query = Ingredient::getRecipesByIngredientAndUserIdQuery();
+        
+        // Prepare the query and execute it with the given ingredient ID and user ID
+        $statement = $this->pdo->prepare($query);
+        $statement->execute(['ingredient' => $ingredientId, 'userId' => $userId]);
+        $recipes = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Check if any recipes are found
+        if (empty($recipes)) {
+            return $response->withJson(["message" => "No recipes found for the given ingredient and user ID."]);
+        }
+
+        // Group recipes by ID and combine their ingredients
+        $groupedRecipes = [];
+        foreach ($recipes as $recipe) {
+            $recipeId = $recipe['id'];
+            if (!isset($groupedRecipes[$recipeId])) {
+                $groupedRecipes[$recipeId] = $recipe;
+                $groupedRecipes[$recipeId]['ingredients'] = [];
+            }
+            if (!empty($recipe['ingredient_name'])) {
+                $groupedRecipes[$recipeId]['ingredients'][] = [
+                    'name' => $recipe['ingredient_name'],
+                    'quantity' => $recipe['quantity']
+                ];
+            }
+            // Unset unnecessary fields
+            unset($groupedRecipes[$recipeId]['ingredient_name']);
+            unset($groupedRecipes[$recipeId]['quantity']);
+        }
+
+        // Return the recipes as JSON
+        return $response->withJson(array_values($groupedRecipes));
+    } catch (\PDOException $e) {
+        // Handle database errors
+        return $response->withStatus(500)->write("Database error: " . $e->getMessage());
+    }
 }
+
+    
+}
+
+

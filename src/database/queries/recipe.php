@@ -71,6 +71,5 @@ final class Recipe
         "DELETE FROM recipes WHERE id = :recipeId"
     ];
 }
-
     
 }

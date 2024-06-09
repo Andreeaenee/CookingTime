@@ -6,6 +6,7 @@ namespace App\Services;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Database\Queries\Favorites; // Assuming you have a class to handle queries related to favorites
+use fe\src\context\AuthContext;
 
 require_once __DIR__ .  './../config/db.php';
 
@@ -24,11 +25,11 @@ final class FavoritesHandler
     {
         try {
             // Get the user ID from the request or from session, assuming it's available in $args
-            $userId = 2; // Update this with how you're retrieving the user ID
+            $userId = $request->getQueryParams()['userId'];
             
             // Get the SQL query for retrieving favorite recipes for a specific user
             $query = Favorites::getFavoriteRecipeIdsQuery(); // Assuming you have a method to get the query for retrieving favorite recipes
-            
+                                
             // Query database to retrieve favorite recipes for the specific user
             $statement = $this->pdo->prepare($query);
             $statement->bindParam(':userId', $userId);
