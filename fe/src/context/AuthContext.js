@@ -25,10 +25,8 @@ const AuthProvider = ({ children }) => {
   const login = (token, userId, navigate) => {
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
-    
     setIsAuthenticated(true);
     setUserId(userId);
-    console.log('Logged in with:', token, userId);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     navigate('/');
   };

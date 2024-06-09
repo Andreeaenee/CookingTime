@@ -32,7 +32,6 @@ const LoginPage = () => {
       });
       if (response.data.status === "success") {
         login(response.data.token, response.data.userId, navigate);
-        console.log("Login successful:", response);
       } else {
         setErrorMessage(response.data.message);
         setOpenError(true);
