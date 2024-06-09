@@ -103,8 +103,10 @@ const RecipeDetails = () => {
     handleMenuClose();
   };
 
-  const imageUrl = data.image_id ? `/src/uploads/${data.image_id}.jpeg` : 'default-image-url.jpg';
+  //const imageUrl = data.image_id ? `../../../src/uploads/${data.image_id}.jpeg` : 'default-image-url.jpg';
 
+  
+  console.log('imageUrl:', imageUrl);
   return (
     <Wrapper>
       <Container
@@ -155,7 +157,7 @@ const RecipeDetails = () => {
               </Typography>
               <Box
                 component="img"
-                src={imageUrl}
+                src={data.imageUrl || 'default-image-url.jpg'}
                 alt={data.title || 'Recipe Image'}
                 sx={{
                   width: '100%',

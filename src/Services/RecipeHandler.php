@@ -172,44 +172,50 @@ public function getRecipesByUserId($request, $response, $filterId)
     }
 
     public function getRecipeById($request, $response, $args)
-{
-    try {
-        // Extract recipe ID from the route parameters
-        $recipeId = $args['id'];
-
-        // Get the SQL query for retrieving a recipe by its ID
-        $recipeQuery = Recipe::getRecipeByIdQuery();
-        $ingredientQuery = Ingredient::getIngredientsByRecipeIdQuery();
-
-        // Query database to retrieve the recipe by its ID
-        $recipeStatement = $this->pdo->prepare($recipeQuery);
-        $recipeStatement->execute(['recipeId' => $recipeId]);
-        $recipe = $recipeStatement->fetch(\PDO::FETCH_ASSOC);
-
-        // Check if recipe exists
-        if (!$recipe) {
-            return $response->withStatus(404)->write("Recipe not found");
+    {
+        try {
+            // Extract recipe ID from the route parameters
+            $recipeId = $args['id'];
+    
+            // Get the SQL query for retrieving a recipe by its ID
+            $recipeQuery = Recipe::getRecipeByIdQuery();
+            $ingredientQuery = Ingredient::getIngredientsByRecipeIdQuery();
+    
+            // Query database to retrieve the recipe by its ID
+            $recipeStatement = $this->pdo->prepare($recipeQuery);
+            $recipeStatement->execute(['recipeId' => $recipeId]);
+            $recipe = $recipeStatement->fetch(\PDO::FETCH_ASSOC);
+    
+            // Check if recipe exists
+            if (!$recipe) {
+                return $response->withStatus(404)->write("Recipe not found");
+            }
+    
+            // Query database to retrieve ingredients for the recipe
+            $ingredientStatement = $this->pdo->prepare($ingredientQuery);
+            $ingredientStatement->execute(['recipeId' => $recipeId]);
+            $ingredients = $ingredientStatement->fetchAll(\PDO::FETCH_ASSOC);
+    
+            // Add the ingredients to the recipe details
+            $recipe['ingredients'] = $ingredients;
+    
+            // Construct imageUrl if image_id exists
+            if (!empty($recipe['image_id'])) {
+                $recipe['imageUrl'] = $request->getUri()->getScheme() . '://' . $request->getUri()->getHost() . ':8080/uploads/' . $recipe['image_id'] . '.jpeg';
+            }
+    
+            // Remove the redundant ingredient name and quantity from the recipe details
+            unset($recipe['ingredient_name']);
+            unset($recipe['quantity']);
+    
+            // Return the recipe with ingredients as JSON
+            return $response->withJson($recipe);
+        } catch (\PDOException $e) {
+            // Handle database errors
+            return $response->withStatus(500)->write("Database error: " . $e->getMessage());
         }
-
-        // Query database to retrieve ingredients for the recipe
-        $ingredientStatement = $this->pdo->prepare($ingredientQuery);
-        $ingredientStatement->execute(['recipeId' => $recipeId]);
-        $ingredients = $ingredientStatement->fetchAll(\PDO::FETCH_ASSOC);
-
-        // Add the ingredients to the recipe details
-        $recipe['ingredients'] = $ingredients;
-
-        // Remove the redundant ingredient name and quantity from the recipe details
-        unset($recipe['ingredient_name']);
-        unset($recipe['quantity']);
-
-        // Return the recipe with ingredients as JSON
-        return $response->withJson($recipe);
-    } catch (\PDOException $e) {
-        // Handle database errors
-        return $response->withStatus(500)->write("Database error: " . $e->getMessage());
     }
-}
+    
 
 public function deleteRecipe($request, $response, $args)
 {

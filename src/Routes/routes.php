@@ -3,49 +3,51 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-return function ($app) {
 
-    // Setup route using the RouteService
-    //$app->get('/', '\App\Services\RouteService:helloWorld'); 
-   
+return function ($app) {
+    
+    //add the image middleware
+    $app->add(new \App\Services\ImageMiddleware());
+
     // Group for recipes routes
     $app->group('/recipes', function () use ($app) {
-        $app->get('/categories', '\App\Services\RecipeHandler:getCategories');
-        $app->get('/ingredients', '\App\Services\RecipeHandler:getIngredients');
-        $app->get('/{id}', '\App\Services\RecipeHandler:getRecipeById'); 
-        $app->post('', '\App\Services\RecipeHandler:addRecipe');
-        $app->get('', '\App\Services\RecipeHandler:getFilteredRecipes'); 
-        $app->put('/{id}', '\App\Services\RecipeHandler:updateRecipe'); 
-        $app->delete('/{id}', '\App\Services\RecipeHandler:deleteRecipe');
+        $app->get('/categories', \App\Services\RecipeHandler::class . ':getCategories');
+        $app->get('/ingredients', \App\Services\RecipeHandler::class . ':getIngredients');
+        $app->get('/{id}', \App\Services\RecipeHandler::class . ':getRecipeById');
+        $app->post('', \App\Services\RecipeHandler::class . ':addRecipe');
+        $app->get('', \App\Services\RecipeHandler::class . ':getFilteredRecipes');
+        $app->put('/{id}', \App\Services\RecipeHandler::class . ':updateRecipe');
+        $app->delete('/{id}', \App\Services\RecipeHandler::class . ':deleteRecipe');
     });
-
 
     // Group for users routes
     $app->group('/users', function () use ($app) {
-        $app->post('', '\App\Services\UserHandler:addUser');
-        $app->put('/{userId}', '\App\Services\UserHandler:updateUser'); 
-        $app->get('/{userId}', '\App\Services\UserHandler:getUserById'); 
-        $app->delete('/{userId}', '\App\Services\UserHandler:deleteUser'); 
+        $app->post('', \App\Services\UserHandler::class . ':addUser');
+        $app->put('/{userId}', \App\Services\UserHandler::class . ':updateUser');
+        $app->get('/{userId}', \App\Services\UserHandler::class . ':getUserById');
+        $app->delete('/{userId}', \App\Services\UserHandler::class . ':deleteUser');
     });
 
-    //Favorites routes  
+    // Favorites routes  
     $app->group('/favorites', function () use ($app) {
-        $app->post('', '\App\Services\FavoritesHandler:addFavorite');
-        $app->get('', '\App\Services\FavoritesHandler:getFavorite'); 
-        $app->delete('/{id}', '\App\Services\FavoritesHandler:deleteFavorite'); 
+        $app->post('', \App\Services\FavoritesHandler::class . ':addFavorite');
+        $app->get('', \App\Services\FavoritesHandler::class . ':getFavorite');
+        $app->delete('/{id}', \App\Services\FavoritesHandler::class . ':deleteFavorite');
     });
-    
-    //Shopping Lists routes
+
+    // Shopping Lists routes
     $app->group('/shoppingLists', function () use ($app) {
-        $app->post('', '\App\Services\ShoppingListHandler:addShoppingList');
-        $app->get('', '\App\Services\ShoppingListHandler:getShoppingList');
-        $app->put('/{id}', '\App\Services\ShoppingListHandler:updateShoppingList');
-        $app->get('/{id}', '\App\Services\ShoppingListHandler:getShoppingListId'); 
-        $app->delete('/{id}', '\App\Services\ShoppingListHandler:deleteShoppingList'); 
+        $app->post('', \App\Services\ShoppingListHandler::class . ':addShoppingList');
+        $app->get('', \App\Services\ShoppingListHandler::class . ':getShoppingList');
+        $app->put('/{id}', \App\Services\ShoppingListHandler::class . ':updateShoppingList');
+        $app->get('/{id}', \App\Services\ShoppingListHandler::class . ':getShoppingListId');
+        $app->delete('/{id}', \App\Services\ShoppingListHandler::class . ':deleteShoppingList');
     });
-   
-    //login post
-    $app->post('/login', '\App\Services\UserHandler:login');
+
+    // Login post
+    $app->post('/login', \App\Services\UserHandler::class . ':login');
+
+
     $app->post('/logout', '\App\Services\UserHandler:logout');
 
 

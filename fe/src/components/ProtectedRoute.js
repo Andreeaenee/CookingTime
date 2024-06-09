@@ -6,15 +6,15 @@ import { AuthContext } from '../context/AuthContext';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, notify } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      notify();
-    }
-  }, [isAuthenticated, notify]);
+  // useEffect(() => {
+    // if (!isAuthenticated) {
+    //   notify();
+    // }
+  // }, [isAuthenticated, notify]);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" />;
+  // }
 
   return children;
 };

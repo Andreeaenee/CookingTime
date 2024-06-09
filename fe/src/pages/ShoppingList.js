@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Typography,
@@ -13,24 +13,34 @@ import {
 import Wrapper from '../components/Wrapper';
 import { getShoppingLists, postShoppingList } from '../api/getShoppingLists';
 import ShoppingListCard from '../components/ShoppingListCard';
+import { AuthContext } from '../context/AuthContext';
 
 const ShoppingList = () => {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [listName, setListName] = useState('');
+  const { userId, isAuthenticated, notify } = useContext(AuthContext);
 
   useEffect(() => {
-    getShoppingLists()
-      .then((response) => {
-        setData(response);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
+    if (isAuthenticated) {
+      getShoppingLists(userId)
+        .then((response) => {
+          setData(response);
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+    } else {
+      // notify();
+    }
+  }, [isAuthenticated, userId, notify]);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    if (isAuthenticated) {
+      setOpen(true);
+    } else {
+      // notify();
+    }
   };
 
   const handleClose = () => {
@@ -40,12 +50,25 @@ const ShoppingList = () => {
 
   const handleCreate = () => {
     const data = {
-      user_id: 2,
+      user_id: userId,
       name: listName,
     };
-    postShoppingList(data);
-    handleClose();
-    window.location.reload();
+    postShoppingList(data)
+      .then(() => {
+        setOpen(false);
+        setListName('');
+        // Optionally, refresh the list of shopping lists
+        getShoppingLists(userId)
+          .then((response) => {
+            setData(response);
+          })
+          .catch((error) => {
+            console.error('Error fetching data:', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error creating shopping list:', error);
+      });
   };
 
   return (
@@ -66,7 +89,7 @@ const ShoppingList = () => {
           onClick={handleClickOpen}
           sx={{
             backgroundColor: '#8361F7',
-            '&:hover': { backgroundColor: '#303f9f'},
+            '&:hover': { backgroundColor: '#303f9f' },
             fontWeight: 'bold',
             padding: '10px 20px',
           }}
